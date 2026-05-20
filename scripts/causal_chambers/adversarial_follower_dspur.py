@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import log_loss
 from utils import sample_truncnorm_integers, wait_for_completion
 
-from invariance_for_classification import StabilizedClassificationClassifier
+from stabilized_classification import StabilizedClassificationClassifier
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(DIR, "data")
