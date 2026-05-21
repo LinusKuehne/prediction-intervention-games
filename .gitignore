@@ -213,7 +213,6 @@ settings.json
 dev_scripts/
 .DS_Store
 .credentials
-results/
 tmp/
 synthetic_stable_blanket_experiments/.mplconfig
 synthetic_stable_blanket_experiments/old_results
@@ -228,3 +227,6 @@ synthetic_stable_blanket_experiments/outputs_use_13
 synthetic_stable_blanket_experiments/outputs_standard
 synthetic_stable_blanket_experiments/outputs_lingauss
 synthetic_stable_blanket_experiments/outputs_x4-uses-x1-x3
+
+# large dataset -- transferred to the cluster manually, not version-controlled
+scripts/sr_TA40_ET.csv
