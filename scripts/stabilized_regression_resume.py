@@ -35,9 +35,9 @@ from stab_reg_eval import skill_score
 # configuration  (data / SEED / subsample / forest params match the original)
 # ---------------------------------------------------------------------------
 
-DATA_PATH = (
-    "/Users/linuskuehne/git/prediction-intervention-games/scripts/sr_TA40_ET.csv"
-)
+# dataset sits next to this script (scripts/sr_TA40_ET.csv); resolved relative
+# to the script file so it works on any machine, regardless of the cwd
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sr_TA40_ET.csv")
 SCORES_CSV = "results/stabilized_regression_scores.csv"
 
 TARGET = "ET"
