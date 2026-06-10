@@ -7,6 +7,8 @@ import causalchamber.lab as lab
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from csc_baseline import CausalStrategicClassifier
+from nn_baselines import NNBaselineClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import log_loss
 from utils import sample_truncnorm_integers, wait_for_completion
@@ -33,6 +35,17 @@ PRED_COLORS = {
     "f_sb_b": "#D55E00",
     "f_all": "#009E73",
     "f_sc": "#E69F00",
+    "f_cserm": "#984EA3",
+    "f_cserm_lo": "#A65628",
+    "f_cserm_001": "#E7298A",
+    "f_cserm_0": "#666666",
+    "f_imp": "#44AA99",
+    "f_erm_lin": "#332288",
+    "f_erm_deep": "#332288",
+    "f_irm_lin": "#882255",
+    "f_irm_deep": "#882255",
+    "f_dro_lin": "#999933",
+    "f_dro_deep": "#999933",
 }
 PRED_LABELS = {
     "f_sb": r"$\hat{f}_{\rm RGB}$ (wrong stable blanket)",
@@ -40,6 +53,26 @@ PRED_LABELS = {
     "f_sb_b": r"$\hat{f}_{\rm RGB + ir\_2 + vis\_2}$",
     "f_all": r"$\hat{f}_{\rm all}$",
     "f_sc": r"$\hat{f}^{\;\mathrm{SC}}$",
+    "f_cserm": r"$\hat{f}^{\,\mathrm{CSERM}}_{0.05}$",
+    "f_cserm_lo": r"$\hat{f}^{\,\mathrm{CSERM}}_{0.005}$",
+    "f_cserm_001": r"$\hat{f}^{\,\mathrm{CSERM}}_{0.001}$",
+    "f_cserm_0": r"$\hat{f}^{\,\mathrm{CSERM}}_{0}$",
+    "f_imp": r"$\hat{f}^{\;\mathrm{IMP}}$",
+    "f_erm_lin": r"ERM (lin)",
+    "f_erm_deep": r"ERM (deep)",
+    "f_irm_lin": r"IRM (lin)",
+    "f_irm_deep": r"IRM (deep)",
+    "f_dro_lin": r"GroupDRO (lin)",
+    "f_dro_deep": r"GroupDRO (deep)",
+}
+# Linestyle per predictor (NN pairs share a color; linear=dashed, deep=solid).
+PRED_STYLES = {
+    "f_erm_lin": "--",
+    "f_erm_deep": "-",
+    "f_irm_lin": "--",
+    "f_irm_deep": "-",
+    "f_dro_lin": "--",
+    "f_dro_deep": "-",
 }
 
 
@@ -260,12 +293,162 @@ print(
     f"in active ensemble? {sb_b_in_active}"
 )
 
+# ─── CSERM (clean-data) baselines ────────────────────────────────────────────
+# Linear strategic classifiers (Horowitz & Rosenfeld, 2023) that anticipate
+# manipulation of the only movable sensors (ir_3, vis_3). See csc_baseline.py.
+# The cost-grid floor (smallest multiple of the calibrated alpha_0) sets how
+# aggressively CSERM down-weights the manipulable features: worst-env Brier decreases
+# monotonically as alpha shrinks, so the floor controls where f_cserm lands on the
+# continuum from f_all-like (gameable) to f_sb_b-like (stable blanket). We report
+# two floors: 0.05 (moderate, ~log-symmetric around alpha_0) and 0.005 (aggressive).
+CSERM_MULTS_05 = (0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0)
+CSERM_MULTS_005 = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0)
+
+f_cserm = CausalStrategicClassifier(
+    features=ALL_FEATURES,
+    causal_features=["red", "green", "blue"],
+    movable_features=["ir_3", "vis_3"],
+    alpha_mults=CSERM_MULTS_05,
+    random_state=SEED,
+)
+f_cserm.fit(X_train_all, y_full, E_full)
+print(
+    f"Trained f_cserm     (CSERM clean-data, floor 0.05; "
+    f"alpha0={f_cserm.alpha0_:.3g}, alpha*={f_cserm.alpha_:.3g})"
+)
+
+f_cserm_lo = CausalStrategicClassifier(
+    features=ALL_FEATURES,
+    causal_features=["red", "green", "blue"],
+    movable_features=["ir_3", "vis_3"],
+    alpha_mults=CSERM_MULTS_005,
+    random_state=SEED,
+)
+f_cserm_lo.fit(X_train_all, y_full, E_full)
+print(
+    f"Trained f_cserm_lo  (CSERM clean-data, floor 0.005; "
+    f"alpha0={f_cserm_lo.alpha0_:.3g}, alpha*={f_cserm_lo.alpha_:.3g})"
+)
+
+# Two further floors down the continuum: 0.001, and 0. alpha=0 forces ||w_movable||=0,
+# i.e. CSERM drops ir_3/vis_3 entirely -> a linear classifier on the stable blanket. We
+# pin f_cserm_0 to alpha=0 (single-point grid): worst-env Brier is actually slightly worse
+# at exactly 0 than at tiny alpha>0, so a grid including 0 would never select it, yet we
+# want to display this endpoint explicitly.
+CSERM_MULTS_001 = (
+    0.001,
+    0.005,
+    0.01,
+    0.025,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    4.0,
+    8.0,
+    16.0,
+)
+CSERM_MULTS_0 = (0.0,)
+
+f_cserm_001 = CausalStrategicClassifier(
+    features=ALL_FEATURES,
+    causal_features=["red", "green", "blue"],
+    movable_features=["ir_3", "vis_3"],
+    alpha_mults=CSERM_MULTS_001,
+    random_state=SEED,
+)
+f_cserm_001.fit(X_train_all, y_full, E_full)
+print(
+    f"Trained f_cserm_001 (CSERM clean-data, floor 0.001; "
+    f"alpha0={f_cserm_001.alpha0_:.3g}, alpha*={f_cserm_001.alpha_:.3g})"
+)
+
+f_cserm_0 = CausalStrategicClassifier(
+    features=ALL_FEATURES,
+    causal_features=["red", "green", "blue"],
+    movable_features=["ir_3", "vis_3"],
+    alpha_mults=CSERM_MULTS_0,
+    random_state=SEED,
+)
+f_cserm_0.fit(X_train_all, y_full, E_full)
+print(
+    f"Trained f_cserm_0   (CSERM clean-data, floor 0 = drops ir_3/vis_3; "
+    f"alpha0={f_cserm_0.alpha0_:.3g}, alpha*={f_cserm_0.alpha_:.3g})"
+)
+
+
+# ─── IMP (invariant most-predictive): reuse the fitted SC model ───────────────
+# IMP predicts with the single highest-predictiveness invariant subset, which the
+# StabilizedClassification model already exposes via predict_proba(method="best").
+# No extra training: f_imp wraps the already-fitted f_sc.
+class _SCMethodAdapter:
+    """Expose a fitted StabilizedClassification under a fixed predict method."""
+
+    def __init__(self, sc_model, method):
+        self._sc = sc_model
+        self._method = method
+
+    def predict_proba(self, X):
+        return self._sc.predict_proba(X, method=self._method)
+
+
+f_imp = _SCMethodAdapter(f_sc, "best")
+print("Built f_imp   (IMP = SC single best invariant subset; reuses f_sc)")
+
+
+# ─── NN baselines: ERM / IRM / GroupDRO (deep) ────────────────────────────────
+# ERM-NN (all features) isolates RandomForest-vs-NN against f_all. IRM uses the bounded
+# convex penalty (lambda in [0, 1]); all select hyperparameters by worst-environment
+# Brier and are seed-ensembled over 3 seeds. See nn_baselines.py. The linear variants are
+# implemented there but not fit here (they nearly coincide with their deep/RF counterparts:
+# linear ERM/IRM are gamed like f_all, and linear IRM selects lambda~0.1 -> approx ERM).
+#
+# Why IRM (deep) is ~flat AND high (~0.20) in the deployment-MSE (right) panel: selection
+# picks the largest lambda (~0.99; "heavy invariance" -- see the printed cfg below). It is
+# NOT a constant predictor (outputs are bimodal, std~0.31, and it does respond to ir_3).
+# Rather, with the train->cube shift it is biased high and over-predicts the positive class
+# (cube E[f|Y=0]~0.57, should be 0). The chamber feedback scales with Y (led_3_ir, pol_2
+# proportional to Y), so the follower can only manipulate the Y=1 samples -- the Y=0 samples
+# are fixed. (HIGH) the over-prediction on the unmovable Y=0 class pins Brier ~0.20 and the
+# follower cannot touch it; (FLAT) on the Y=1 samples IRM-deep keeps predicting positive
+# under attack (ir_3 ~1275->67 yet it does not flip them, unlike the RF), so E[f] barely
+# moves. Miscalibrated-but-unfoolable, not constant.
+NN_METHODS = [
+    ("f_erm_deep", "erm", "deep"),
+    ("f_irm_deep", "irm", "deep"),
+    ("f_dro_deep", "groupdro", "deep"),
+]
+nn_models = {}
+for _nn_name, _nn_method, _nn_arch in NN_METHODS:
+    _clf = NNBaselineClassifier(
+        method=_nn_method,
+        architecture=_nn_arch,
+        n_seeds=3,
+        n_jobs=8,
+        random_state=SEED,
+    )
+    _clf.fit(X_train_all, y_full, E_full)
+    nn_models[_nn_name] = _clf
+    print(
+        f"Trained {_nn_name:11s} ({_nn_method}-{_nn_arch}; "
+        f"epochs*={_clf.best_n_epochs_}, worstValBrier={_clf.best_worst_val_brier_:.4f}; "
+        f"cfg={_clf.best_config_})"
+    )
+
 PREDICTORS = {
     "f_sb": (f_sb, SB_FEATURES),
     "f_sb_ir2": (f_sb_ir2, SB_IR2_FEATURES),
     "f_sb_b": (f_sb_b, SB_B_FEATURES),
     "f_all": (f_all, ALL_FEATURES),
     "f_sc": (f_sc, ALL_FEATURES),
+    "f_cserm": (f_cserm, ALL_FEATURES),
+    "f_cserm_lo": (f_cserm_lo, ALL_FEATURES),
+    "f_cserm_001": (f_cserm_001, ALL_FEATURES),
+    "f_cserm_0": (f_cserm_0, ALL_FEATURES),
+    "f_imp": (f_imp, ALL_FEATURES),
+    **{name: (nn_models[name], ALL_FEATURES) for name, _, _ in NN_METHODS},
 }
 
 
@@ -487,47 +670,88 @@ df_budget.to_csv(
 print("\nSaved adversarial_results_by_budget.csv")
 
 
-# ─── plot ─────────────────────────────────────────────────────────────────────
-
-fig, axes = plt.subplots(1, 2, figsize=(10, 3.0), sharey=False)
+# ─── plots ────────────────────────────────────────────────────────────────────
 
 df_plot = df_budget[df_budget["budget"] <= 0.5]
 
-for pred_name in PREDICTORS:
-    sub = df_plot[df_plot["predictor"] == pred_name].sort_values("budget")
-    color = PRED_COLORS[pred_name]
-    label = PRED_LABELS[pred_name]
-    delta_ef = sub["adv_ef"] - sub["clean_ef"]
-    axes[0].plot(sub["budget"], delta_ef, marker="o", color=color, label=label)
-    axes[1].plot(sub["budget"], sub["adv_brier"], marker="o", color=color, label=label)
-    axes[1].axhline(sub["clean_brier"].iloc[0], color=color, linestyle=":", alpha=0.35)
 
-axes[0].axhline(0, color="gray", linestyle=":", linewidth=0.8, alpha=0.6)
-axes[0].set_xlabel("intervention bound", fontsize=12)
-axes[0].set_ylabel(
-    r"$\mathbb{E}_{e^*(\hat{f})}[\hat{f}(X)] - \mathbb{E}_{e_{\mathrm{ref}}}[\hat{f}(X)]$",
-    fontsize=12,
+def make_budget_plot(pred_names, plot_base):
+    """Budget-curve figure (Δ E[f] and adversarial Brier) for a subset of predictors."""
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.0), sharey=False)
+
+    for pred_name in pred_names:
+        sub = df_plot[df_plot["predictor"] == pred_name].sort_values("budget")
+        color = PRED_COLORS[pred_name]
+        label = PRED_LABELS[pred_name]
+        style = PRED_STYLES.get(pred_name, "-")
+        delta_ef = sub["adv_ef"] - sub["clean_ef"]
+        axes[0].plot(
+            sub["budget"],
+            delta_ef,
+            marker="o",
+            color=color,
+            linestyle=style,
+            label=label,
+        )
+        axes[1].plot(
+            sub["budget"],
+            sub["adv_brier"],
+            marker="o",
+            color=color,
+            linestyle=style,
+            label=label,
+        )
+        axes[1].axhline(
+            sub["clean_brier"].iloc[0], color=color, linestyle=":", alpha=0.35
+        )
+
+    axes[0].axhline(0, color="gray", linestyle=":", linewidth=0.8, alpha=0.6)
+    axes[0].set_xlabel("intervention bound", fontsize=12)
+    axes[0].set_ylabel(
+        r"$\mathbb{E}_{e^*(\hat{f})}[\hat{f}(X)] - \mathbb{E}_{e_{\mathrm{ref}}}[\hat{f}(X)]$",
+        fontsize=12,
+    )
+    axes[1].set_xlabel("intervention bound", fontsize=12)
+    axes[1].set_ylabel("deployment MSE\n" + r"under $e^*(\hat{f})$", fontsize=12)
+
+    for ax in axes:
+        ax.tick_params(axis="both", labelsize=14)
+
+    handles, labels = axes[0].get_legend_handles_labels()
+    n = len(pred_names)
+    ncol = n if n <= 5 else int(np.ceil(n / 2))  # wrap to 2 rows when crowded
+    n_rows = int(np.ceil(n / ncol))
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0),
+        ncol=ncol,
+        fontsize=14,
+        frameon=False,
+    )
+    plt.tight_layout(rect=[0, 0.10 + 0.07 * n_rows, 1, 1])
+
+    plt.savefig(plot_base + ".png", dpi=300)
+    plt.savefig(plot_base + ".pdf")
+    plt.close()
+    print(f"Saved plot to {plot_base}.{{png,pdf}}")
+
+
+# Figure 1: the methods already in the paper (unchanged).
+make_budget_plot(
+    ["f_sb", "f_sb_ir2", "f_sb_b", "f_all", "f_sc"],
+    os.path.join(DATA_DIR, "adversarial_budget_curves"),
 )
-axes[1].set_xlabel("intervention bound", fontsize=12)
-axes[1].set_ylabel("deployment MSE\n" + r"under $e^*(\hat{f})$", fontsize=12)
 
-for ax in axes:
-    ax.tick_params(axis="both", labelsize=14)
-
-handles, labels = axes[0].get_legend_handles_labels()
-fig.legend(
-    handles,
-    labels,
-    loc="lower center",
-    bbox_to_anchor=(0.5, 0),
-    ncol=len(PREDICTORS),
-    fontsize=14,
-    frameon=False,
+# Figure 2: causal / invariance baselines (CSERM variants + IMP) vs. stabilized classification.
+make_budget_plot(
+    ["f_cserm", "f_cserm_lo", "f_cserm_001", "f_cserm_0", "f_imp", "f_sc"],
+    os.path.join(DATA_DIR, "adversarial_budget_curves_baselines"),
 )
-plt.tight_layout(rect=[0, 0.17, 1, 1])
 
-plot_base = os.path.join(DATA_DIR, "adversarial_budget_curves")
-plt.savefig(plot_base + ".png", dpi=300)
-plt.savefig(plot_base + ".pdf")
-plt.close()
-print(f"Saved plot to {plot_base}.{{png,pdf}}")
+# Figure 3: NN baselines (ERM / IRM / GroupDRO, deep) vs. stabilized classification.
+make_budget_plot(
+    ["f_erm_deep", "f_irm_deep", "f_dro_deep", "f_sc"],
+    os.path.join(DATA_DIR, "adversarial_budget_curves_nn"),
+)
