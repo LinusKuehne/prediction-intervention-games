@@ -18,17 +18,19 @@ from adversarial_common import (
     ACTION_NAMES,
     ACTIONS,
     DATA_DIR,
-    M,
     N_REPS,
     N_SAMPLES,
     THRESHOLD,
+    M,
     cube_path,
     rgb_seeds,
 )
 from utils import sample_truncnorm_integers, wait_for_completion
 
 DIR = os.path.dirname(os.path.abspath(__file__))
+TMP_DIR = os.path.join(DIR, "tmp")  # download_data requires this dir to already exist
 os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(TMP_DIR, exist_ok=True)
 
 print(f"Action menu: {M} actions")
 
@@ -66,7 +68,7 @@ def generate_cube(rlab, rep):
     print(f"[rep {rep}] Waiting for phase 1...")
     wait_for_completion(rlab)
 
-    df_p1 = rlab.download_data(eid_p1, root=os.path.join(DIR, "tmp")).dataframe
+    df_p1 = rlab.download_data(eid_p1, root=TMP_DIR).dataframe
     Y_all = np.where(df_p1["ir_1"].values > THRESHOLD, 1, 0)
     print(f"[rep {rep}] Phase 1 complete. N={N_SAMPLES}, P(Y=1)={Y_all.mean():.3f}")
 
@@ -95,7 +97,7 @@ def generate_cube(rlab, rep):
     B_by_action = {}
     Z_by_action = {}
     for action_name, eid in eids_p2.items():
-        df_p2 = rlab.download_data(eid, root=os.path.join(DIR, "tmp")).dataframe
+        df_p2 = rlab.download_data(eid, root=TMP_DIR).dataframe
         B_by_action[action_name] = df_p2[["ir_2", "vis_2"]].values
         Z_by_action[action_name] = df_p2[["ir_3", "vis_3"]].values
 
