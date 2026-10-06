@@ -57,6 +57,29 @@ def parse_args() -> argparse.Namespace:
         help="Allow the X4 adversary to depend on X1 and X3 in addition to Y, X2, and eps4.",
     )
     p.add_argument(
+        "--x4-uses-x1",
+        action="store_true",
+        help="Allow the X4 adversary to depend on X1 in addition to Y, X2, and eps4 "
+        "(A_4 = {X1}; the exact population pendant of a perfect-recall individual).",
+    )
+    p.add_argument("--attack-depth", type=int, default=2)
+    p.add_argument(
+        "--attack-bound-anneal-steps",
+        type=int,
+        default=0,
+        help="grow the bound linearly from 0 to b over this many training steps",
+    )
+    p.add_argument("--attack-slope", type=float, default=1.0)
+    p.add_argument(
+        "--attack-lr-schedule", choices=["constant", "cosine"], default="constant"
+    )
+    p.add_argument(
+        "--attack-continuation",
+        action="store_true",
+        help="Add one start initialised from the network trained for the previous "
+        "(smaller) bound.",
+    )
+    p.add_argument(
         "--attack-mode", type=str, choices=["bound", "cost"], default="bound"
     )
     p.add_argument("--disable-x1-intervention", action="store_true")
@@ -108,6 +131,12 @@ def main() -> None:
         noise_distribution=args.noise_distribution,
         student_t_df=args.student_t_df,
         x4_uses_x1_x3=args.x4_uses_x1_x3,
+        x4_uses_x1=args.x4_uses_x1,
+        attack_depth=args.attack_depth,
+        attack_slope=args.attack_slope,
+        attack_lr_schedule=args.attack_lr_schedule,
+        attack_continuation=args.attack_continuation,
+        attack_bound_anneal_steps=args.attack_bound_anneal_steps,
         lineargaussian=args.lineargaussian,
         simple=args.simple,
         bounds=tuple(args.bounds),

@@ -44,19 +44,47 @@ class GraphSets:
 
 
 class AttackNetwork(nn.Module):
-    def __init__(self, in_dim: int, hidden_dim: int, bound: float) -> None:
+    """MLP with ``depth`` hidden layers and output ``bound * tanh(slope * h)``.
+
+    Options (defaults reproduce the paper's networks): ``dropout`` after each
+    hidden layer (training mode only), ``output`` squashing ("tanh" or
+    "softsign"), and ``zero_init`` of the output layer (shift starts at 0).
+    """
+
+    def __init__(
+        self,
+        in_dim: int,
+        hidden_dim: int,
+        bound: float,
+        depth: int = 2,
+        slope: float = 1.0,
+        dropout: float = 0.0,
+        output: str = "tanh",
+        zero_init: bool = False,
+    ) -> None:
         super().__init__()
         self.bound = float(bound)
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, 1),
-        )
+        self.slope = float(slope)
+        self.output = output
+        layers: list[nn.Module] = []
+        d = in_dim
+        for _ in range(depth):
+            layers += [nn.Linear(d, hidden_dim), nn.ReLU()]
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+            d = hidden_dim
+        last = nn.Linear(d, 1)
+        if zero_init:
+            nn.init.zeros_(last.weight)
+            nn.init.zeros_(last.bias)
+        layers.append(last)
+        self.net = nn.Sequential(*layers)
 
     def forward(self, inputs: Tensor) -> Tensor:
-        return self.bound * torch.tanh(self.net(inputs))
+        h = self.slope * self.net(inputs)
+        if self.output == "softsign":
+            return self.bound * h / (1 + h.abs())
+        return self.bound * torch.tanh(h)
 
 
 class ConstantAttack(nn.Module):
@@ -78,21 +106,35 @@ class AttackMechanisms(nn.Module):
         intervene_on_x1: bool = True,
         simple: bool = False,
         x4_uses_x1_x3: bool = False,
+        x4_uses_x1: bool = False,
+        depth: int = 2,
+        slope: float = 1.0,
+        dropout: float = 0.0,
+        output: str = "tanh",
+        zero_init: bool = False,
     ) -> None:
         super().__init__()
         self.bound = float(bound)
         self.intervene_on_x1 = intervene_on_x1
         self.simple = simple
         self.x4_uses_x1_x3 = x4_uses_x1_x3
+        self.x4_uses_x1 = x4_uses_x1
+        self.depth = int(depth)
+        self.slope = float(slope)
         if simple:
             self.x1_net = ConstantAttack(bound) if intervene_on_x1 else None
             self.x4_net = ConstantAttack(bound)
         else:
+            opts = dict(dropout=dropout, output=output, zero_init=zero_init)
             self.x1_net = (
-                AttackNetwork(2, hidden_dim, bound) if intervene_on_x1 else None
+                AttackNetwork(2, hidden_dim, bound, depth, slope, **opts)
+                if intervene_on_x1
+                else None
             )
-            x4_input_dim = 5 if x4_uses_x1_x3 else 3
-            self.x4_net = AttackNetwork(x4_input_dim, hidden_dim, bound)
+            x4_input_dim = 5 if x4_uses_x1_x3 else (4 if x4_uses_x1 else 3)
+            self.x4_net = AttackNetwork(
+                x4_input_dim, hidden_dim, bound, depth, slope, **opts
+            )
 
     def perturb_x1(self, x2: Tensor, noise: Tensor) -> Tensor:
         if self.x1_net is None:
@@ -118,6 +160,10 @@ class AttackMechanisms(nn.Module):
                     "x1 and x3 are required when x4_uses_x1_x3 is enabled."
                 )
             pieces.extend([x1, x3])
+        elif self.x4_uses_x1:
+            if x1 is None:
+                raise ValueError("x1 is required when x4_uses_x1 is enabled.")
+            pieces.append(x1)
         return self.x4_net(torch.cat(pieces, dim=1))
 
 
@@ -156,6 +202,14 @@ class NonlinearStableBlanketSCM:
         return 0.8 * torch.tanh(x2) + 0.6 * x2 + 0.3 * noise
 
     @staticmethod
+    def _clean_y(x1: Tensor, x2: Tensor, noise: Tensor) -> Tensor:
+        return torch.sin(x1) + 0.8 * x2 + 0.5 * x1 * x2 + 0.4 * noise
+
+    @staticmethod
+    def _clean_x3(y: Tensor, noise: Tensor) -> Tensor:
+        return torch.tanh(1.2 * y) + 0.45 * y.square() + 0.5 * noise
+
+    @staticmethod
     def _clean_x4_from_parents(y: Tensor, x2: Tensor, noise: Tensor) -> Tensor:
         return 2.1 * torch.tanh(y) + 0.9 * y + 0.55 * x2 + 0.15 * y * x2 + 0.2 * noise
 
@@ -185,8 +239,8 @@ class NonlinearStableBlanketSCM:
         if attack is not None and self.intervene_on_x1:
             x1 = x1 + attack.perturb_x1(x2, eps1)
 
-        y = torch.sin(x1) + 0.8 * x2 + 0.5 * x1 * x2 + 0.4 * eps_y
-        x3 = torch.tanh(1.2 * y) + 0.45 * y.square() + 0.5 * eps3
+        y = self._clean_y(x1, x2, eps_y)
+        x3 = self._clean_x3(y, eps3)
         x4 = self._clean_x4_from_parents(y, x2, eps4)
         if attack is not None:
             x4 = x4 + attack.perturb_x4(y, x2, eps4, x1=x1, x3=x3)
@@ -220,8 +274,8 @@ class NonlinearStableBlanketSCM:
             delta_x1 = attack.perturb_x1(x2, eps1)
         x1 = clean_x1 + delta_x1
 
-        y = torch.sin(x1) + 0.8 * x2 + 0.5 * x1 * x2 + 0.4 * eps_y
-        x3 = torch.tanh(1.2 * y) + 0.45 * y.square() + 0.5 * eps3
+        y = self._clean_y(x1, x2, eps_y)
+        x3 = self._clean_x3(y, eps3)
 
         clean_x4 = self._clean_x4_from_parents(y, x2, eps4)
         delta_x4 = torch.zeros_like(clean_x4)

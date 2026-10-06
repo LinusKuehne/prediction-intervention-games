@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
@@ -55,32 +56,83 @@ def optimize_attack(
     lr: float,
     eval_size: int,
     seed: int,
+    x4_uses_x1: bool = False,
+    init_attack: AttackMechanisms | None = None,
+    init_candidates: Sequence[AttackMechanisms] = (),
+    depth: int = 2,
+    slope: float = 1.0,
+    lr_schedule: str = "constant",
+    dropout: float = 0.0,
+    output: str = "tanh",
+    zero_init: bool = False,
+    weight_decay: float = 0.0,
+    bound_anneal_steps: int = 0,
 ) -> AttackResult:
+    """Train the attack networks; keep the best of several starts by held-out value.
+
+    ``restarts`` random starts (all initialised at ``init_attack`` if given) plus
+    one start per network in ``init_candidates`` (e.g. the network trained for the
+    previous bound: continuation in b).  ``depth``/``slope`` configure the
+    networks; ``lr_schedule`` is "constant" or "cosine" (annealed to 0).
+    ``dropout``/``output``/``zero_init`` are network options (see
+    ``AttackNetwork``); ``weight_decay`` > 0 switches to AdamW.  With
+    ``bound_anneal_steps`` > 0 the bound grows linearly from 0 to ``bound``
+    over that many steps (the networks learn the sign pattern of the shifts
+    while the shifts are small, which avoids collapsing to a constant sign).
+    """
     # Predictor is frozen.
     predictor.model.eval()
     for p in predictor.model.parameters():
         p.requires_grad_(False)
 
-    best_attack: AttackMechanisms | None = None
-    best_value: float | None = None
-    best_regularized_value: float | None = None
-
-    for restart in range(restarts):
-        torch.manual_seed(seed + 1000 * restart)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(seed + 1000 * restart)
-        attack = AttackMechanisms(
+    def make_attack() -> AttackMechanisms:
+        return AttackMechanisms(
             bound=bound,
             hidden_dim=hidden_dim,
             intervene_on_x1=intervene_on_x1,
             simple=simple,
             x4_uses_x1_x3=x4_uses_x1_x3,
+            x4_uses_x1=x4_uses_x1,
+            depth=depth,
+            slope=slope,
+            dropout=dropout,
+            output=output,
+            zero_init=zero_init,
         ).to(scm.device)
-        optimizer = torch.optim.Adam(attack.parameters(), lr=lr)
+
+    best_attack: AttackMechanisms | None = None
+    best_value: float | None = None
+    best_regularized_value: float | None = None
+
+    inits: list[AttackMechanisms | None] = [init_attack] * restarts + list(
+        init_candidates
+    )
+    for restart, init in enumerate(inits):
+        torch.manual_seed(seed + 1000 * restart)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed + 1000 * restart)
+        attack = make_attack()
+        if init is not None:  # warm start or continuation from another bound
+            attack.load_state_dict(init.state_dict())
+        optimizer = (
+            torch.optim.AdamW(attack.parameters(), lr=lr, weight_decay=weight_decay)
+            if weight_decay > 0
+            else torch.optim.Adam(attack.parameters(), lr=lr)
+        )
+        attack.train()
+        scheduler = (
+            torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=steps)
+            if lr_schedule == "cosine"
+            else None
+        )
         generator = torch.Generator(device=scm.device)
         generator.manual_seed(seed + 1000 * restart + 123)
 
-        for _ in range(steps):
+        nets = [n for n in (attack.x1_net, attack.x4_net) if n is not None]
+        for step in range(steps):
+            if bound_anneal_steps > 0:
+                for net in nets:
+                    net.bound = bound * min(1.0, (step + 1) / bound_anneal_steps)
             optimizer.zero_grad(set_to_none=True)
             x_adv, y_adv, delta_x1, delta_x4 = scm.sample_with_intervention_info(
                 batch_size, attack=attack, generator=generator
@@ -96,7 +148,12 @@ def optimize_attack(
                 loss = -value + cost * strength
             loss.backward()
             optimizer.step()
+            if scheduler is not None:
+                scheduler.step()
 
+        for net in nets:
+            net.bound = float(bound)
+        attack.eval()
         eval_gen = torch.Generator(device=scm.device)
         eval_gen.manual_seed(seed + 5000 + restart)
         with torch.no_grad():
@@ -126,14 +183,9 @@ def optimize_attack(
         if better:
             best_value = value_eval
             best_regularized_value = regularized_value_eval
-            best_attack = AttackMechanisms(
-                bound=bound,
-                hidden_dim=hidden_dim,
-                intervene_on_x1=intervene_on_x1,
-                simple=simple,
-                x4_uses_x1_x3=x4_uses_x1_x3,
-            ).to(scm.device)
+            best_attack = make_attack()
             best_attack.load_state_dict(attack.state_dict())
+            best_attack.eval()
 
     assert (
         best_attack is not None

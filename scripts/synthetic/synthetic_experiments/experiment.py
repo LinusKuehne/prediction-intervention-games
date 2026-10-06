@@ -55,6 +55,14 @@ class ExperimentConfig:
     noise_distribution: NoiseDistribution = "gaussian"
     student_t_df: int = 3
     x4_uses_x1_x3: bool = False
+    x4_uses_x1: bool = False  # delta_4 additionally sees X1 (A_4 = {X1}, Lemma 4)
+    attack_depth: int = 2
+    attack_slope: float = 1.0
+    attack_lr_schedule: str = "constant"  # or "cosine"
+    attack_continuation: bool = False  # extra start from the previous bound's network
+    attack_bound_anneal_steps: int = (
+        0  # bound grows linearly from 0 to b over these steps
+    )
     lineargaussian: bool = False
     simple: bool = False
     bounds: tuple[float, ...] = (0.25, 0.5, 1.0, 2.0, 4.0)
@@ -198,6 +206,7 @@ def run_single_run(
         predictors = _train_all_predictors(config, scm, run_id, train_size)
         for predictor in predictors:
             for objective in config.objectives:
+                prev_attack = None  # for --attack-continuation (bounds increasing)
                 for sweep_value in sweep_values:
                     bound = float(
                         sweep_value
@@ -221,7 +230,20 @@ def run_single_run(
                         lr=config.attack_lr,
                         eval_size=config.attack_eval_size,
                         seed=run_id,
+                        x4_uses_x1=config.x4_uses_x1,
+                        depth=config.attack_depth,
+                        slope=config.attack_slope,
+                        lr_schedule=config.attack_lr_schedule,
+                        bound_anneal_steps=config.attack_bound_anneal_steps,
+                        init_candidates=(
+                            [prev_attack]
+                            if config.attack_continuation
+                            and prev_attack is not None
+                            and sweep_name == "bound"
+                            else ()
+                        ),
                     )
+                    prev_attack = attack_result.attack
                     rows.append(
                         ResultRow(
                             run_id=run_id,

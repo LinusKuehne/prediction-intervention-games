@@ -1,0 +1,19 @@
+\begin{tikzpicture}[>=stealth, scale=1.0]
+    \node (E) at (-2.1, 0.5) {$E$};
+    \node (RGB) at (0, 0) {$\mathtt{(red, green, blue)}$};
+    \node (Y) at (2.1, 0.5) {$Y$};
+
+    \node (ir3) at (-0.8, 1) {$\mathtt{ir\_3}$};
+    \node (vis3) at (0.8, 1) {$\mathtt{vis\_3}$};
+    \node (ir1) at (-0.8, -0.8) {$\mathtt{ir\_1}$};
+    \node (vis1) at (0.8, -0.8) {$\mathtt{vis\_1}$};
+
+    \draw[->] (Y) to[bend left=12] (ir3);
+    \draw[->] (Y) -- (vis3);
+    \draw[->] (E) -- (ir3);
+    \draw[->] (E) -- (RGB);
+    \draw[->] (RGB) -- (ir3);
+    \draw[->] (RGB) -- (vis3);
+    \draw[->] (RGB) -- (ir1);
+    \draw[->] (RGB) -- (vis1);
+\end{tikzpicture}

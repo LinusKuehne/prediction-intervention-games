@@ -1,0 +1,148 @@
+\begin{tikzpicture}[>={Stealth[round]}, scale = 0.8, every legend/.append style={at={(0,-1.5)}, anchor=north, column sep=1cm}]
+    % Define the nodes at specific coordinates
+    \node (a1) at (-3, 3) [draw, circle, minimum size=0.96cm] {$X_1$};
+    \node (a2) at (3, 0) [draw, circle, minimum size=0.96cm] {$X_2$};
+    \node (a3) at (-3, 0) [draw, circle, minimum size=0.96cm] {$X_3$};
+    \node (a4) at (-1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_4$};
+    \node (a5) at (1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_5$};
+    \node (a6) at (1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_6$};
+    \node (a7) at (-1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_7$};
+    \node (a8) at (-3, -3.1) [draw, circle, minimum size=0.96cm] {$X_8$};
+    \node (aY) at (0, 0) [draw, circle, minimum size=0.96cm,fill=gray!50] {$Y$};
+    \node (aE) at (0, -3.1) [draw, circle, minimum size=0.96cm,fill=gray!50] {$E$};
+   
+
+    % Define the edges
+    \draw[->] (a1) -- (a4);
+    \draw[->] (a4) -- (aY);
+    \draw[->] (a4) -- (a5);
+    \draw[->] (a5) -- (aY);
+    \draw[->] (aY) -- (a7);
+    \draw[->] (aY) -- (a6);
+    \draw[->] (a2) -- (a6);
+    \draw[->] (a7) -- (a8);
+    \draw[->] (a3) -- (a7);
+    \draw[->, line width=0.6mm] (aE) -- (a7);
+    \draw[->, line width=0.6mm] (aE) -- (a6);
+    \draw[->, line width=0.6mm] (aE) -- (a5);
+
+
+
+\begin{pgfonlayer}{background}
+
+
+
+%\node[draw, ellipse, color=blue, fill=blue!50, minimum height=1.3cm, minimum width=2cm, opacity=0.2, fit=(a2) (a3) (a4) (a5) (a7), inner sep = -7pt] {};
+
+\node[draw, ellipse, color=blue, fill=blue!50, minimum height=1.4cm, minimum width=2cm, opacity=0.2, fit=(a2) (a3) (a4) (a5) (a7), inner sep = -6pt] at (0,0.05) {};
+
+\node[draw, ellipse, color=green, fill=green!70, minimum height=1.1cm, minimum width=2cm, opacity=0.5, fit=(a4) (a5), inner sep = 1pt] {};
+
+\node[draw, ellipse, color=red, fill=red!50, minimum height=1.1cm, minimum width=1.9cm, opacity=0.6, fit=(a4) (a5), inner sep = -1pt] {};
+ 
+    \end{pgfonlayer}
+   
+
+
+
+
+\begin{scope}[shift={(0,-8)}]
+       \node (a1) at (-3, 3) [draw, circle, minimum size=0.96cm] {$X_1$};
+    \node (a2) at (3, 0) [draw, circle, minimum size=0.96cm] {$X_2$};
+    \node (a3) at (-3, 0) [draw, circle, minimum size=0.96cm] {$X_3$};
+    \node (a4) at (-1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_4$};
+    \node (a5) at (1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_5$};
+    \node (a6) at (1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_6$};
+    \node (a7) at (-1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_7$};
+    \node (a8) at (-3, -3.1) [draw, circle, minimum size=0.96cm] {$X_8$};
+    \node (aY) at (0, 0) [draw, circle, minimum size=0.96cm,fill=gray!50] {$Y$};
+    \node (aE) at (0, -3.1) [draw, circle, minimum size=0.96cm,fill=gray!50] {$E$};
+   
+
+    % Define the edges
+    \draw[->] (a1) -- (a4);
+    \draw[->] (a4) -- (aY);
+    \draw[->] (a4) -- (a5);
+    \draw[->] (a5) -- (aY);
+    \draw[->] (aY) -- (a7);
+    \draw[->] (aY) -- (a6);
+    \draw[->] (a2) -- (a6);
+    \draw[->] (a7) -- (a8);
+    \draw[->] (a3) -- (a7);
+    \draw[->, line width=0.6mm] (aE) -- (a6);
+    \draw[->, line width=0.6mm] (aE) -- (a5);
+
+
+
+\begin{pgfonlayer}{background}
+
+\node[draw, ellipse, color=blue, fill=blue!50, minimum height=1.4cm, minimum width=2cm, opacity=0.2, fit=(a2) (a3) (a4) (a5) (a7), inner sep = -6pt] at (0,0.05) {};
+
+\node[draw, ellipse, color=green, fill=green!70, minimum height=3.3cm, minimum width=5.1cm, opacity=0.5, inner sep=-5pt, rotate=30] at (-0.8, 0.23) {};
+
+
+ \node[draw, ellipse, color=red, fill=red!50, minimum height=1.1cm, minimum width=1.9cm, opacity=0.6, fit=(a4) (a5), inner sep = -1pt] {};
+
+ 
+    \end{pgfonlayer}
+    \end{scope}
+
+
+
+    \begin{scope}[shift={(0,-16)}]
+       \node (a1) at (-3, 3) [draw, circle, minimum size=0.96cm] {$X_1$};
+    \node (a2) at (3, 0) [draw, circle, minimum size=0.96cm] {$X_2$};
+    \node (a3) at (-3, 0) [draw, circle, minimum size=0.96cm] {$X_3$};
+    \node (a4) at (-1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_4$};
+    \node (a5) at (1.5, 1.5) [draw, circle, minimum size=0.96cm] {$X_5$};
+    \node (a6) at (1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_6$};
+    \node (a7) at (-1.5, -1.5) [draw, circle, minimum size=0.96cm] {$X_7$};
+    \node (a8) at (-3, -3.1) [draw, circle, minimum size=0.96cm] {$X_8$};
+    \node (aY) at (0, 0) [draw, circle, minimum size=0.96cm,fill=gray!50] {$Y$};
+    \node (aE) at (0, -3.1) [draw, circle, minimum size=0.96cm,fill=gray!50] {$E$};
+   
+
+    % Define the edges
+    \draw[->] (a1) -- (a4);
+    \draw[->] (a4) -- (aY);
+    \draw[->] (a4) -- (a5);
+    \draw[->] (a5) -- (aY);
+    \draw[->] (aY) -- (a7);
+    \draw[->] (aY) -- (a6);
+    \draw[->] (a2) -- (a6);
+    \draw[->] (a7) -- (a8);
+    \draw[->] (a3) -- (a7);
+    \draw[->, line width=0.6mm] (aE) -- (a5);
+
+
+
+
+\begin{pgfonlayer}{background}
+
+\node[draw, ellipse, color=blue, fill=blue!50, minimum height=1.4cm, minimum width=2cm, opacity=0.2, fit=(a2) (a3) (a4) (a5) (a7), inner sep = -6pt] at (0,0.05) {};
+
+        \node[draw, ellipse, color=green, fill=green!70, minimum height=1.4cm, minimum width=2cm, opacity=0.5, fit=(a2) (a3) (a4) (a5) (a7), inner sep = -9pt] at (0,0.05) {};
+
+ \node[draw, ellipse, color=red, fill=red!50, minimum height=1.1cm, minimum width=1.9cm, opacity=0.6, fit=(a4) (a5), inner sep = -1pt] {};
+
+
+
+ 
+ 
+    \end{pgfonlayer}
+    \end{scope}
+
+
+% Legend
+    \begin{scope}[shift={(0,-21)}]
+        \node (legend) [rectangle, draw, fill=white, opacity=0.5, text opacity=1, inner sep=1em] {
+            \begin{tabular}{@{}ccc@{}}
+                \textcolor{red!40}{\rule{0.6cm}{0.3cm}} $\PA(Y)$ & \textcolor{green!40}{\rule{0.6cm}{0.3cm}} $\SB(Y)$ & \textcolor{blue!20}{\rule{0.6cm}{0.3cm}} $\MB(Y)$ 
+            \end{tabular}
+        };
+    \end{scope}
+
+
+    
+    
+\end{tikzpicture}

@@ -228,3 +228,28 @@ synthetic_stable_blanket_experiments/outputs_use_13
 synthetic_stable_blanket_experiments/outputs_standard
 synthetic_stable_blanket_experiments/outputs_lingauss
 synthetic_stable_blanket_experiments/outputs_x4-uses-x1-x3
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+main.app
+main.pdf
+
+# paper sources and figures (LaTeX build artifacts above stay ignored)
+!prediction_intervention_games/*.tex
+!prediction_intervention_games/images/*.pdf
+
+# exploratory experiment scripts and outputs not used for the paper
+further_experiments/

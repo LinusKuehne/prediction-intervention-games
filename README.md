@@ -193,6 +193,51 @@ python run_experiments.py \
   --costs 0.0 0.01 0.05 0.1 0.25 0.5 1.0
 ```
 
+### Individual vs. population follower (appendix E.5; see appendix_experiment_report.md)
+
+`run_individual_follower.py` compares the paper's neural *population* follower
+with *individual* followers (§ 2.1 of the paper) on identical draws of
+individuals. Every individual solves their own problem by grid search, with
+Monte Carlo over not-yet-realized noise (backward induction: choose `delta_1`
+after observing `(X2, eps1)`, then `delta_4` after observing `(X1, X2, Y, eps4)`).
+Follower names: `nn_x1` is the population follower whose `delta_4` additionally
+sees `X1` (`A_4 = {X1}`), `nn_standard` the follower of § 6.1, `ind_nox3` the
+individual followers.
+
+Final runs used in the paper. The networks are trained with the recipe of § E.4 plus a bound
+ramp (`--attack-bound-anneal-steps 1000`: the bound grows linearly from 0 to `b` over the first
+1000 of the 2000 steps), which avoids runs in which the shift of `X4` collapses to one sign for
+the whole population:
+
+```bash
+python run_individual_follower.py --output-dir outputs_appendix_anneal_standard \
+  --followers nn_standard nn_x1 ind_nox3 --attack-bound-anneal-steps 1000 --num-runs 10 --n-jobs 5 \
+  --torch-num-threads 3 --grid-size-x1 13 --mc-stage1 16 --mc-stage2 16 --mc-final 64
+python run_individual_follower.py --lineargaussian --output-dir outputs_appendix_anneal_lingauss \
+  --followers nn_standard nn_x1 ind_nox3 --attack-bound-anneal-steps 1000 --num-runs 10 --n-jobs 5 \
+  --torch-num-threads 1 --grid-size-x1 13 --mc-stage1 16 --mc-stage2 16 --mc-final 64
+# appendix figure in the style of Fig. 2 (written to the paper's images folder)
+python plot_appendix_individual_followers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard \
+  --out ../../prediction_intervention_games/images/appendix_individual_followers
+```
+
+(The stored folders were produced with `--followers nn_standard nn_x1`; the `ind_nox3` rows,
+which are deterministic given predictor, noise draws and seed, were copied from the previous
+run and the summaries rebuilt with `--plot-only`. The commands above recompute them, which
+costs about 50 extra minutes in the nonlinear SCM.)
+
+Outputs per `--output-dir`: `results_per_run.csv`, `results_summary.csv`,
+`paired_differences.csv`, `config.json` and figures; `--plot-only` rebuilds summaries and
+figures from a saved `results_per_run.csv`. Library code:
+`synthetic_experiments/individual_follower.py` (noise draws, outcomes, first implementation),
+`synthetic_experiments/individual_follower_simple.py` (compact implementation used for
+`ind_nox3`), `synthetic_experiments/warm_start.py` (diagnostic only).
+
+Earlier and exploratory runs (first implementation and its validation, one-shot validation of
+§ 2.1, sequential runs with warm start and omniscient follower, the training-recipe study, the
+information ladder) and all their outputs are in `further_experiments/` (gitignored); see
+`further_experiments/README.md`.
+
 ### Expected qualitative behavior
 
 - On the clean SCM, `all_variables` should usually achieve the lowest test MSE.

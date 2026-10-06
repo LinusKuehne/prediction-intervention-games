@@ -1,0 +1,11 @@
+\begin{tikzpicture}[>=stealth, scale=1.05]
+    \node (Y) at (0,1) {$Y$};
+    \node (E) at (2,1) {$E$};
+    \node (X1) at (-1,0) {$X_1$};
+    \node (X2) at (1, 0) {$X_2$};
+    
+    \draw[->] (E) -- (X2);
+    \draw[->] (Y) -- (X2);
+    \draw[->] (Y) -- (X1);
+    \draw[->] (X2) -- (X1);
+\end{tikzpicture}

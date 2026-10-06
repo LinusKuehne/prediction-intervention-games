@@ -1,0 +1,17 @@
+\begin{tikzpicture}[>=stealth, scale=1.0]
+    \node (E) at (-2.1, 0.5) {$E$};
+    \node (RGB) at (0, 0) {$\mathtt{RGB}$};
+    \node (Y) at (2.1, 0.5) {$Y$};
+    \node (Bottom) at (0, -1) {$(\mathtt{ir\_2}, \mathtt{vis\_2})$};
+    \node (Top) at (0, 1) {$\mathtt{(ir\_3, vis\_3)}$};
+    % \node (ir2) at (-0.8, -0.8) {$\mathtt{ir\_2}$};
+    % \node (vis2) at (0.8, -0.8) {$\mathtt{vis\_2}$};
+
+    \draw[->] (E) -- (Top);
+    % \draw[->] (E) -- (RGB);
+    \draw[->] (RGB) -- (Top);
+    \draw[->] (RGB) -- (Y);
+    \draw[->] (Y) -- (Top);
+    \draw[->] (RGB) -- (Bottom);
+    %\draw[->] (RGB) -- (vis2);
+\end{tikzpicture}
