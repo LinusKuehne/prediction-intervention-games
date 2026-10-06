@@ -1554,7 +1554,7 @@ $X_1$ and $X_3$ in addition to its usual inputs. The qualitative results do not
 change; see \Cref{app:synthetic_details}. This is consistent with the
 graphical theory from \Cref{sec:augmentation}: adding these action-parent edges does not change the stable
 blanket.
-\individualexp{\Cref{app:individual_followers} repeats this experiment with individual followers as in \Cref{sec:individuals}, who each choose an intervention based on their own noise realization, instead of a single follower for the whole population; consistent with \Cref{sec:individuals}, the leader's deployment MSE is nearly the same.}
+\individualexp{\Cref{app:individual_followers} presents a similar experiment with individual followers as in \Cref{sec:individuals} instead of the follower used here; the leader's deployment MSE is nearly the same.}
 %\rml{, so the same invariant set remains the robust choice}.
 
 \begin{figure*}[t]
@@ -1910,28 +1910,29 @@ Through the bound~\eqref{eq:worst_case_obj}, prediction-intervention games provi
 
 
 
-\individualexp{\subsection{Individual followers with observed noise and causally ordered targets} \label{app:individual_followers_theory}
+\individualexp{\subsection{Individual followers with observed noise and sequential interventions} \label{app:individual_followers_theory}
 
-The argument of \Cref{sec:individuals} assumes that the individual follower observes only variables $X_O$ with $O \subseteq \ND(\CH(E))$, that it can set each intervention target $X_j$, $j \in \CH(E)$ (target, for short), to any value, and that $\PA(j) \subseteq O \cup \CH(E)$.
-Here, we extend the argument to the setting of \Cref{sec:synthetic_experiments}, in which \Cref{app:individual_followers} compares individual and population followers empirically.
-That setting differs from the assumptions above in two ways.
-First, the follower does not set a target to an arbitrary value but shifts the value that the target would take without intervention by at most $b$.
-This value depends on the target's parents and on the noise $\varepsilon_j$ of its structural assignment, so an individual who knows what it is shifting observes $\varepsilon_j$, and its set of admissible values depends on this observation.
-Bounded shifts of one's own values are a more realistic model of individual behavior than setting arbitrary values.
-Second, the target $X_4$ is a descendant of the target $X_1$, so its parent $Y$ is not in $\ND(\CH(E))$, but the follower in \Cref{sec:synthetic_experiments} sets $X_4$ after observing $Y$.
-A follower who intervenes at several points in time naturally uses what it has observed in between.
+The argument of \Cref{sec:individuals} assumes for simplicity that the individual follower observes only variables $X_O$ with $O \subseteq \ND(\CH(E))$ and that $\PA(j) \subseteq O \cup \CH(E)$ for every intervention target $X_j$, $j \in \CH(E)$.
+Here, we extend the argument to individual followers in the setting of \Cref{sec:synthetic_experiments}; this setting violates these assumptions in two ways.
+First, the follower observes the noise variables $\varepsilon_1$ and $\varepsilon_4$, which corresponds to knowing the values $X_1$ and $X_4$ would have taken before the intervention.
+Second, the follower sets $X_4$ after observing $Y$, which is a descendant of the earlier intervention target $X_1$ and hence not in $\ND(\CH(E))$.
+\Cref{app:individual_followers} compares individual and population followers empirically.
 
-\paragraph{Extension.}
-Fix a topological order of $\G_0$ and let the individual set the targets one after another in this order.
-Before setting $X_j$, it observes $\varepsilon_j$ and the values $x_{O_j}$ of a set $O_j$ of variables preceding $X_j$ in the order; $O_j$ contains $\PA(j)$, the targets set earlier, and the variables observed when setting them.
-It then chooses $x_j$ from a set $C_j(x_{O_j}, \varepsilon_j)$ of admissible values, for example all values within $b$ of the value without intervention.
-We go through the targets in reverse order, so that when we reach $X_j$, the rules for all later targets are already fixed.
-The value in $C_j(x_{O_j}, \varepsilon_j)$ that maximizes $\E[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$ defines a function $g_j(x_{O_j}, \varepsilon_j)$, which we fix as the rule for $X_j$.
-This conditional expectation does not depend on the rules for the earlier targets, because their values and inputs are part of $x_{O_j}$ and all other variables follow their unchanged assignments or the rules already fixed.
-As in \Cref{sec:individuals}, the functions $(g_j)_{j \in \CH(E)}$ also maximize the population objective $\E[k(f, X, Y)]$ among all rules that choose admissible values, because at every stage they maximize the conditional expectation for every value of the observations.
-A population of such individuals therefore acts like a population follower whose assignment of $X_j$ is $g_j(X_{\PA(j)}, X_{A_j}, \varepsilon_j)$ with $A_j \coloneqq O_j \setminus \PA(j)$.
-The new edges follow the topological order, so the augmented graph is acyclic, and $\varepsilon_j$, which is independent of all other noise variables, serves as the exogenous noise of the new assignment.
-In \Cref{sec:synthetic_experiments}, $X_1$ precedes $X_4$, and the individual observes $(x_2, \varepsilon_1)$ before setting $X_1$ and $(x_1, x_2, y, \varepsilon_4)$ before setting $X_4$, so $A_1 = \varnothing$ and $A_4 = \{X_1\}$, which satisfies the assumption of Lem.~\ref{lem:augmentation}.}
+\paragraph{Sequential individual followers.}
+We consider an individual follower who sets the intervention targets $X_j$, $j \in \CH(E)$, sequentially along a fixed topological order of $\G_0$.
+Before setting $X_j$ to $x_j$, it observes the noise $\varepsilon_j$ of the structural assignment of $X_j$ and the values $x_{O_j}$ of a set $O_j$ of variables.
+We impose two conditions on $O_j$: (i) its variables precede $X_j$ in the topological order and include $\PA(j)$, and (ii) it contains the earlier intervention targets $X_i$ and their observation sets $O_i$. The value of $x_j$ may depend on $(x_{O_j}, \varepsilon_j)$.
+
+We characterize the follower's optimal choices by backward induction.
+For each $j$, let $g_j(x_{O_j}, \varepsilon_j)$ denote the value $x_j$ that maximizes $\E_{x_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$.
+As in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $x_j$, and the earlier intervention targets are set to their observed values.
+Setting the earlier targets to their observed values does not change the conditional expectation, because the noise $\varepsilon_i$ of an earlier target $X_i$ is independent of all other noise variables and enters the SCM only through $X_i$, whose value is observed.
+Starting from the last intervention target and going backwards, this defines $g_j$ for all $j \in \CH(E)$.
+The functions $(g_j)_{j \in \CH(E)}$ therefore describe the optimal behavior of the individual follower.
+As in \Cref{sec:individuals}, they also maximize the population objective $\E[k(f, X, Y)]$ among all structural assignments of the $X_j$ that are functions of $(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
+
+A population of such individual followers hence acts like a population follower whose structural assignment of $X_j$ is $g_j(X_{\PA(j)}, X_{A_j}, \varepsilon_j)$ with $A_j \coloneqq O_j \setminus \PA(j)$.
+The new edges $X_k \to X_j$, $k \in A_j$, follow the topological order, so the augmented graph is acyclic, and $\varepsilon_j$, which is independent of all other noise variables, serves as the exogenous noise of the new assignment.}
 
 \subsection{Subset-level formulation} \label{app:subset_formulation}
 
@@ -3205,7 +3206,7 @@ $f$ was arbitrary, $f_S$ minimizes the worst-case risk.
 
 We now provide more details on the synthetic experiments described in \cref{sec:synthetic_experiments}. We describe the data-generating process (\cref{app:dgp}), how the leader and the follower optimize their objectives (\cref{sec:sdfds}), an additional analysis showing that predictors that are invariant in
 population can be unstable under the follower's intervention at finite sample
-sizes, with this instability shrinking as the leader receives more training data (\cref{app:synthetic_regression_error}), and implementation details (\cref{app:synthetic_implementation})\individualexp{, and a comparison of the population follower of \Cref{sec:synthetic_experiments} with individual followers as in \Cref{sec:individuals} (\cref{app:individual_followers})}.
+sizes, with this instability shrinking as the leader receives more training data (\cref{app:synthetic_regression_error}), and implementation details (\cref{app:synthetic_implementation})\individualexp{, and a comparison of the population follower of \Cref{sec:synthetic_experiments} with individual followers as in \Cref{sec:individuals} and \Cref{app:individual_followers_theory} (\cref{app:individual_followers})}.
 
 
 \subsection{Data-generating processes}
@@ -3365,46 +3366,52 @@ fresh observations under the selected $E_{\delta_1}, E_{\delta_4}$. The experime
 
 \individualexp{\subsection{Comparison with individual followers} \label{app:individual_followers}
 
-The follower in \Cref{sec:synthetic_experiments} is a population follower: its interventions $E_{\delta_1}$ and $E_{\delta_4}$ are functions of random variables that apply to the whole population, whereas an individual follower as in \Cref{sec:individuals} chooses its intervention given its own observed values.
-Here, we compare the two followers empirically in the setting of \Cref{sec:synthetic_experiments}.
-By \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, the individuals' optimal interventions also solve the population follower's problem if both followers use the same information; under the MSE objective, both then yield the same deployment MSE for the leader.
-A difference between the two can therefore stem from how well the gradient-based optimization of \Cref{app:synthetic_implementation} fits the networks of the population follower, or from the approximations in computing the individual followers' interventions, which we describe next.
+The follower in \Cref{sec:synthetic_experiments} is a population follower: its interventions $E_{\delta_1}$ and $E_{\delta_4}$ are functions that apply to the whole population, whereas an individual follower as in \Cref{sec:individuals} chooses an intervention for its own values only.
+Here, we compare the two followers empirically in the setting of \Cref{sec:synthetic_experiments}, with one change to the inputs of the population follower that we describe below.
+As argued in \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so, when the follower maximizes the MSE, the leader's deployment MSE should be similar under both.
+Differences can be due to the training of the population follower's neural network, or to the approximations in computing the individual followers' interventions, which we describe next.
 
 \paragraph{Individual followers.}
 We use the SCMs of \Cref{app:dgp} with the graph in \Cref{fig:synthetic_dag}.
-Each individual has its own realization of the exogenous noise $(\varepsilon_1, \varepsilon_2, \varepsilon_Y, \varepsilon_3, \varepsilon_4, \varepsilon_5)$, observes part of it, and chooses its own shifts of $X_1$ and $X_4$.
-It first observes $(x_2, \varepsilon_1)$ and chooses a shift $\delta_1 \in [-b, b]$ of $X_1$, that is, its own value of $E_{\delta_1}$; then $Y$ and $X_3$ are realized, and it chooses a shift $\delta_4 \in [-b, b]$ of $X_4$ given $(x_1, x_2, y, \varepsilon_4)$.
-These are the inputs of $E_{\delta_1}$ and $E_{\delta_4}$ in \Cref{sec:synthetic_experiments}, except that $E_{\delta_4}$ does not depend on $X_1$ there; the next paragraph addresses this.
-In particular, the individual observes neither $x_3$ nor $\varepsilon_5$, which are not inputs of $E_{\delta_4}$ either.
-Like the population follower, the individuals optimize against the known SCM and predictor $f_S$: each choice maximizes the follower's objective of \Cref{sec:sdfds} conditional on the individual's observations, that is, in expectation over the noise it has not observed.
-We compute the choices by grid search over $13$ equally spaced values in $[-b, b]$ and approximate the expectations by Monte Carlo.
-The choice of $\delta_4$ uses $64$ draws of $(\varepsilon_3, \varepsilon_5)$.
-The choice of $\delta_1$ anticipates the later choice of $\delta_4$ (backward induction as in \Cref{app:individual_followers_theory}): for each candidate $\delta_1$, we draw $(\varepsilon_Y, \varepsilon_4)$ $16$ times, compute in each draw the optimal $\delta_4$ and the resulting objective with $16$ draws of $(\varepsilon_3, \varepsilon_5)$, and average over the draws.
+An individual follower intervenes only on its own values of $X_1$ and $X_4$, by shifts $\delta_1, \delta_4 \in [-b, b]$ that take the place of $E_{\delta_1}$ and $E_{\delta_4}$.
+It chooses $\delta_1$ after observing $(x_2, \varepsilon_1)$, and $\delta_4$ after $Y$ has been realized and it has observed $(x_1, x_2, y, \varepsilon_4)$; it observes neither $x_3$ nor $\varepsilon_5$.
+Except for $x_1$, which we discuss below, these are the inputs of $E_{\delta_1}$ and $E_{\delta_4}$ in \Cref{sec:synthetic_experiments}.
+The individual knows the SCM and the predictor $f_S$, as the population follower does, and each of its choices maximizes the follower's objective of \Cref{sec:sdfds} given its observations, that is, in expectation over the noise terms it has not observed.
 
-\paragraph{Matching the information of the two followers.}
-An individual knows $x_1$ when choosing $\delta_4$, whereas $E_{\delta_4}$ in \Cref{sec:synthetic_experiments} depends on $(Y, X_2, \varepsilon_4)$ only; with different information, the two followers differ even if both maximize the follower's objective.
-In this comparison, $E_{\delta_4}$ therefore depends on $(Y, X_2, \varepsilon_4, X_1)$, which corresponds to $A_4 = \{X_1\}$ in \Cref{app:individual_followers_theory} and satisfies the assumption of Lem.~\ref{lem:augmentation}.
+\paragraph{Computation.}
+For each of $13$ equally spaced candidate values in $[-b, b]$, we estimate the expected objective that this value leads to by averaging over draws of the unobserved noise terms, and we select the best candidate.
+For $\delta_4$, we use $64$ draws of $(\varepsilon_3, \varepsilon_5)$.
+For $\delta_1$, the expected objective depends on the later choice of $\delta_4$ (backward induction as in \Cref{app:individual_followers_theory}): for each candidate $\delta_1$, we draw $(\varepsilon_Y, \varepsilon_4)$ $16$ times, compute in each draw the optimal $\delta_4$ and its objective with $16$ draws of $(\varepsilon_3, \varepsilon_5)$, and average.
+This grid search is possible because each individual makes only two scalar choices for its own realized inputs, whereas $E_{\delta_1}$ and $E_{\delta_4}$ are functions of their inputs, which \Cref{sec:sdfds} represents by neural networks.
+We compute the choices of $4000$ individuals, that is, for $4000$ draws of the exogenous noise, and evaluate the population follower on the same draws.
+
+\paragraph{Information of the two followers.}
+In \Cref{sec:synthetic_experiments}, the population follower's $E_{\delta_4}$ depends on $(Y, X_2, \varepsilon_4)$ only, whereas an individual knows $x_1$ when choosing $\delta_4$; with different inputs, the two followers could differ even if both maximized the follower's objective exactly.
+In this comparison, $E_{\delta_4}$ therefore depends on $(Y, X_2, \varepsilon_4, X_1)$.
+In the notation of \Cref{app:individual_followers_theory}, $O_1 = \{X_2\}$ and $O_4 = \{X_1, X_2, Y\}$, so $A_1 = \varnothing$ and $A_4 = \{X_1\}$, which satisfies the assumption of Lem.~\ref{lem:augmentation}.
 This changes the results of \Cref{sec:synthetic_experiments} only slightly: the deployment MSEs of $\PA(Y)$ and $\SB(Y)$ are identical, and those of the all-variable predictor differ by at most $0.002$ ($10$ runs).
-Both followers are evaluated on the same $4000$ draws of the exogenous noise.
 
 \paragraph{Training of the population follower.}
 The networks are trained as in \Cref{app:synthetic_implementation}, except that the bound is increased linearly from $0$ to $b$ during the first $1000$ of the $2000$ training steps and equals $b$ afterwards.
+The reason is the following.
+For the all-variable predictor and a follower maximizing the MSE, the computed optimal shifts of $X_4$ equal $\pm b$ for all individuals, with the sign varying across individuals.
+With the full bound from the start, one to three of ten runs end in a local maximum of the follower's objective in which the shift of $X_4$ has the same sign for the whole population; the ramp avoids this.
 
-\individualexp{[TODO: if we adopt this training recipe, use it for all experiments: update \Cref{app:synthetic_implementation}, regenerate \Cref{fig:synthetic_main} and \Cref{fig:synthetic_appendix} with it, and delete this paragraph. With the full bound from the start, one to three of ten runs end in a local maximum of the follower's objective in which the shift of $X_4$ has the same sign for the whole population; the ramp avoids this and leaves the results of \Cref{sec:synthetic_experiments} unchanged except for a slightly higher all-variable curve under the MSE objective at $b = 1$.]}
+\individualexp{[TODO for myself: if we use this training recipe, use for all experiments. potentially also add X1 to X4 in 6.1 to harmonize]}
 
 \paragraph{Results.}
-\Cref{fig:individual_followers} shows that the leader's deployment MSE under the two followers coincides for $\PA(Y)$ and $\SB(Y)$ and under the prediction objective.
-For the all-variable predictor under the MSE objective, the individual followers reach a deployment MSE that is below $1\%$ higher than under the population follower in the linear-Gaussian SCM and $2$ to $5\%$ higher in the nonlinear SCM.
-The all-variable curves in \Cref{fig:synthetic_main} therefore slightly underestimate the deployment MSE that an optimal follower achieves, whereas the results for $\PA(Y)$ and $\SB(Y)$ do not depend on how well the follower's objective is optimized.
-For the all-variable predictor, the individuals' optimal shift of $X_4$ always lies at the bound, $\delta_4 = \pm b$, with the sign depending on whether the expected residual $Y - f_S(X_S)$ given the individual's observations is positive or negative.
-Grid search is feasible here because each individual makes two one-dimensional choices and the expectations can be approximated by sampling from the known SCM at negligible cost; the neural-network parameterization of \Cref{sec:sdfds} is the general approach.}
+\Cref{fig:individual_followers} shows that the leader's deployment MSE under the two followers agrees to within about $1\%$ for $\PA(Y)$ and $\SB(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the prediction $\E[f_S(X_S)]$.
+When the follower maximizes the leader's MSE, the individual followers reach a deployment MSE for the all-variable predictor that is less than $1\%$ higher than under the population follower in the linear-Gaussian SCM and $2$ to $5\%$ higher in the nonlinear SCM.
+These results suggest that the all-variable curves in \Cref{fig:synthetic_main} slightly underestimate the deployment MSE that an optimal follower achieves.}
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\textwidth]{images/appendix_individual_followers.pdf}
-    \caption{\individualexp{Population follower of \Cref{sec:synthetic_experiments} (solid lines, filled markers; $E_{\delta_4}$ additionally depends on $X_1$) and individual followers of \Cref{app:individual_followers} (dashed lines, open markers), evaluated on identical draws of the exogenous noise.
-    Left two panels: linear-Gaussian SCM; right two panels: nonlinear SCM; for each SCM, the follower maximizes the MSE (left) or minimizes $\mathbb{E}[f_S(X_S)]$ (right).
-    The two followers yield the same deployment MSE for $\PA(Y)$ and $\SB(Y)$ and under the prediction objective; for the all-variable predictor under the MSE objective, the individual followers reach a slightly higher deployment MSE.
+    \caption{\individualexp{Population follower of \Cref{sec:synthetic_experiments} (solid lines, filled markers) and individual followers of \Cref{app:individual_followers} (dashed lines, open markers), evaluated on identical draws of the exogenous noise. For both followers, the intervention on $X_4$ may depend on $X_1$, unlike in \Cref{fig:synthetic_main}.
+    Left two panels: linear-Gaussian SCM with population regression predictors.
+    Right two panels: nonlinear SCM with predictors estimated from finite data.
+    In each pair, the follower maximizes the leader's MSE (left) or minimizes the prediction $\E[f_S(X_S)]$ (right).
+    The two followers yield nearly the same deployment MSE for $\PA(Y)$ and $\SB(Y)$ and when the follower minimizes the prediction; when it maximizes the MSE, the individual followers reach a slightly higher deployment MSE for the all-variable predictor.
     Curves average $10$ runs, with $95\%$ confidence bands.}}
     \label{fig:individual_followers}
 \end{figure}
