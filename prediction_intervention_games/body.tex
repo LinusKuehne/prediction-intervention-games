@@ -1921,12 +1921,12 @@ Second, the follower sets $X_4$ after observing $Y$, which is a descendant of th
 \paragraph{Sequential individual followers.}
 We consider an individual follower who sets the intervention targets $X_j$, $j \in \CH(E)$, sequentially along a fixed topological order of $\G_0$.
 Before setting $X_j$ to $x_j$, it observes the noise $\varepsilon_j$ of the structural assignment of $X_j$ and the values $x_{O_j}$ of a set $O_j$ of variables.
-We impose two conditions on $O_j$: (i) its variables precede $X_j$ in the topological order and include $\PA(j)$, and (ii) it contains the earlier intervention targets $X_i$ and their observation sets $O_i$. The value of $x_j$ may depend on $(x_{O_j}, \varepsilon_j)$.
+We impose two conditions on $O_j$: (i) its variables precede $X_j$ in the topological order and include $\PA(j)$, and (ii) it contains the earlier intervention targets $X_i$ and their observation sets $O_i$.
 
 We characterize the follower's optimal choices by backward induction.
 For each $j$, let $g_j(x_{O_j}, \varepsilon_j)$ denote the value $x_j$ that maximizes $\E_{x_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$.
-As in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $x_j$, and the earlier intervention targets are set to their observed values.
-Setting the earlier targets to their observed values does not change the conditional expectation, because the noise $\varepsilon_i$ of an earlier target $X_i$ is independent of all other noise variables and enters the SCM only through $X_i$, whose value is observed.
+As in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $x_j$, the earlier intervention targets are set to their observed values, and the later ones are set by their functions $g_i$.
+Setting the earlier targets to their observed values does not change the conditional expectation, whatever functions set them, because the noise $\varepsilon_i$ of an earlier target $X_i$ is independent of all other noise variables and enters the SCM only through $X_i$, whose value is observed.
 Starting from the last intervention target and going backwards, this defines $g_j$ for all $j \in \CH(E)$.
 The functions $(g_j)_{j \in \CH(E)}$ therefore describe the optimal behavior of the individual follower.
 As in \Cref{sec:individuals}, they also maximize the population objective $\E[k(f, X, Y)]$ among all structural assignments of the $X_j$ that are functions of $(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
