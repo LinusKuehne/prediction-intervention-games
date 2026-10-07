@@ -218,7 +218,9 @@ python run_individual_follower.py --lineargaussian --output-dir outputs_appendix
   --torch-num-threads 1 --grid-size-x1 13 --mc-stage1 16 --mc-stage2 16 --mc-final 64
 # appendix figure in the style of Fig. 2 (written to the paper's images folder)
 python plot_appendix_individual_followers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard \
-  --out ../../prediction_intervention_games/images/appendix_individual_followers
+  --out ../../prediction_intervention_games/images/appendix_individual_followers --max-bound 1.0
+# numbers quoted in the text of E.5 (effect of adding X1, relative differences, shifts of X4)
+python appendix_numbers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard
 ```
 
 (The stored folders were produced with `--followers nn_standard nn_x1`; the `ind_nox3` rows,
@@ -228,7 +230,9 @@ costs about 50 extra minutes in the nonlinear SCM.)
 
 Outputs per `--output-dir`: `results_per_run.csv`, `results_summary.csv`,
 `paired_differences.csv`, `config.json` and figures; `--plot-only` rebuilds summaries and
-figures from a saved `results_per_run.csv`. Library code:
+figures from a saved `results_per_run.csv`. `appendix_numbers.py` computes the numbers in the text from these
+files; passing `../../further_experiments/outputs_appendix_final_{lingauss,standard}` (training
+without the bound ramp) instead gives the runs in which the shift of `X4` has one sign. Library code:
 `synthetic_experiments/individual_follower.py` (noise draws, outcomes, first implementation),
 `synthetic_experiments/individual_follower_simple.py` (compact implementation used for
 `ind_nox3`), `synthetic_experiments/warm_start.py` (diagnostic only).

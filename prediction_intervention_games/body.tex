@@ -3366,53 +3366,54 @@ fresh observations under the selected $E_{\delta_1}, E_{\delta_4}$. The experime
 
 \individualexp{\subsection{Comparison with individual followers} \label{app:individual_followers}
 
-The follower in \Cref{sec:synthetic_experiments} is a population follower: its interventions $E_{\delta_1}$ and $E_{\delta_4}$ are functions that apply to the whole population, whereas an individual follower as in \Cref{sec:individuals} chooses an intervention for its own values only.
-Here, we compare the two followers empirically in the setting of \Cref{sec:synthetic_experiments}, with one change to the inputs of the population follower that we describe below.
-As argued in \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so, when the follower maximizes the MSE, the leader's deployment MSE should be similar under both.
-Differences can be due to the training of the population follower's neural network, or to the approximations in computing the individual followers' interventions, which we describe next.
+We compare the population follower of \Cref{sec:synthetic_experiments}, whose intervention functions $E_{\delta_1}$ and $E_{\delta_4}$ are modeled with neural networks, with individual followers whose shifts are computed based on specific realizations of the variables.
+As argued in \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so the leader's deployment MSE should be similar under both.
+Differences can arise from the optimization of the population follower's neural networks, or from the grid and Monte Carlo approximations used for the individual followers.
 
 \paragraph{Individual followers.}
 We use the SCMs of \Cref{app:dgp} with the graph in \Cref{fig:synthetic_dag}.
-An individual follower intervenes only on its own values of $X_1$ and $X_4$, by shifts $\delta_1, \delta_4 \in [-b, b]$ that take the place of $E_{\delta_1}$ and $E_{\delta_4}$.
+Each individual corresponds to one draw of the exogenous noise and chooses shifts $\delta_1, \delta_4 \in [-b, b]$ for its own $X_1$ and $X_4$.
 It chooses $\delta_1$ after observing $(x_2, \varepsilon_1)$, and $\delta_4$ after $Y$ has been realized and it has observed $(x_1, x_2, y, \varepsilon_4)$; it observes neither $x_3$ nor $\varepsilon_5$.
-Except for $x_1$, which we discuss below, these are the inputs of $E_{\delta_1}$ and $E_{\delta_4}$ in \Cref{sec:synthetic_experiments}.
-The individual knows the SCM and the predictor $f_S$, as the population follower does, and each of its choices maximizes the follower's objective of \Cref{sec:sdfds} given its observations, that is, in expectation over the noise terms it has not observed.
-
-\paragraph{Computation.}
-For each of $13$ equally spaced candidate values in $[-b, b]$, we estimate the expected objective that this value leads to by averaging over draws of the unobserved noise terms, and we select the best candidate.
-For $\delta_4$, we use $64$ draws of $(\varepsilon_3, \varepsilon_5)$.
-For $\delta_1$, the expected objective depends on the later choice of $\delta_4$ (backward induction as in \Cref{app:individual_followers_theory}): for each candidate $\delta_1$, we draw $(\varepsilon_Y, \varepsilon_4)$ $16$ times, compute in each draw the optimal $\delta_4$ and its objective with $16$ draws of $(\varepsilon_3, \varepsilon_5)$, and average.
-This grid search is possible because each individual makes only two scalar choices for its own realized inputs, whereas $E_{\delta_1}$ and $E_{\delta_4}$ are functions of their inputs, which \Cref{sec:sdfds} represents by neural networks.
-We compute the choices of $4000$ individuals, that is, for $4000$ draws of the exogenous noise, and evaluate the population follower on the same draws.
+Both followers know the SCM, its noise distributions, and the predictor $f_S$.
+Each choice aims to maximize the follower's objective of \Cref{sec:sdfds} given its observations, that is, in expectation over the noise terms it has not observed.
 
 \paragraph{Information of the two followers.}
-In \Cref{sec:synthetic_experiments}, the population follower's $E_{\delta_4}$ depends on $(Y, X_2, \varepsilon_4)$ only, whereas an individual knows $x_1$ when choosing $\delta_4$; with different inputs, the two followers could differ even if both maximized the follower's objective exactly.
-In this comparison, $E_{\delta_4}$ therefore depends on $(Y, X_2, \varepsilon_4, X_1)$.
+In \Cref{sec:synthetic_experiments}, $E_{\delta_4}$ depends only on $(Y, X_2, \varepsilon_4)$.
+Here, we also allow it to depend on $X_1$, which the individual knows from its earlier choice, so both followers have the same information.
+This adds the edge $X_1 \to X_4$ to the graph in \Cref{fig:synthetic_dag}.
 In the notation of \Cref{app:individual_followers_theory}, $O_1 = \{X_2\}$ and $O_4 = \{X_1, X_2, Y\}$, so $A_1 = \varnothing$ and $A_4 = \{X_1\}$, which satisfies the assumption of Lem.~\ref{lem:augmentation}.
-This changes the results of \Cref{sec:synthetic_experiments} only slightly: the deployment MSEs of $\PA(Y)$ and $\SB(Y)$ are identical, and those of the all-variable predictor differ by at most $0.002$ ($10$ runs).
+With the training described below, adding $X_1$ leaves the results for $\PA(Y)$ and $\SB(Y)$ unchanged and changes the all-variable predictor's mean deployment MSE by at most about $0.002$ over the displayed bounds ($10$ runs).
+
+\paragraph{Computation.}
+We approximate each individual's optimal shifts $\delta_1$ and $\delta_4$ by searching over $13$ equally spaced values in $[-b, b]$, estimating each candidate's expected objective by averaging over draws of the unobserved noise.
+For the final $\delta_4$ decision, we use $64$ draws of $(\varepsilon_3, \varepsilon_5)$.
+To evaluate a candidate $\delta_1$, we use backward induction as in \Cref{app:individual_followers_theory}: we draw $(\varepsilon_Y, \varepsilon_4)$ $16$ times, select the best $\delta_4$ on the grid in each draw using $16$ draws of $(\varepsilon_3, \varepsilon_5)$, and average the resulting estimates.
+Grid search is feasible because each individual makes two scalar choices for given inputs; the population follower instead optimizes functions of all inputs, represented by neural networks in \Cref{sec:sdfds}.
+We evaluate both followers' deployment MSEs on the same $4000$ fresh draws of the exogenous noise.
 
 \paragraph{Training of the population follower.}
-The networks are trained as in \Cref{app:synthetic_implementation}, except that the bound is increased linearly from $0$ to $b$ during the first $1000$ of the $2000$ training steps and equals $b$ afterwards.
-The reason is the following.
-For the all-variable predictor and a follower maximizing the MSE, the computed optimal shifts of $X_4$ equal $\pm b$ for all individuals, with the sign varying across individuals.
-With the full bound from the start, one to three of ten runs end in a local maximum of the follower's objective in which the shift of $X_4$ has the same sign for the whole population; the ramp avoids this.
+The networks are trained as in \Cref{app:synthetic_implementation}, except that the bound is increased linearly from $0$ to $b$ over the first $1000$ of $2000$ training steps and equals $b$ afterwards.
+For the all-variable predictor and a follower maximizing the MSE, the computed shifts of $X_4$ equal $\pm b$ for nearly all individuals, with varying sign.
+With the full bound from the start, some runs learn $X_4$ shifts with the same sign for all individuals.
+This did not occur with the increasing bound.
+A likely reason is that, for a large bound, a shift with the same sign for all individuals already yields most of the follower's gain, so the networks learn it first and their outputs saturate at $\pm b$.
 
 \individualexp{[TODO for myself: if we use this training recipe, use for all experiments. potentially also add X1 to X4 in 6.1 to harmonize]}
 
 \paragraph{Results.}
-\Cref{fig:individual_followers} shows that the leader's deployment MSE under the two followers agrees to within about $1\%$ for $\PA(Y)$ and $\SB(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the prediction $\E[f_S(X_S)]$.
-When the follower maximizes the leader's MSE, the individual followers reach a deployment MSE for the all-variable predictor that is less than $1\%$ higher than under the population follower in the linear-Gaussian SCM and $2$ to $5\%$ higher in the nonlinear SCM.
-These results suggest that the all-variable curves in \Cref{fig:synthetic_main} slightly underestimate the deployment MSE that an optimal follower achieves.}
+\Cref{fig:individual_followers} shows that the leader's mean deployment MSE under the two followers agrees to within about $1\%$ for $\PA(Y)$ and $\SB(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the prediction $\E[f_S(X_S)]$.
+When the follower maximizes the leader's MSE, the individual followers reach a mean deployment MSE for the all-variable predictor that is less than $1\%$ higher than under the population follower in the linear-Gaussian SCM and about $2$ to $5\%$ higher in the nonlinear SCM.
+A likely reason is that, in this setting, the optimal shift of $X_4$ is $b$ for some individuals and $-b$ for others, which is more difficult to learn than the shift $-b$ that is optimal for almost all individuals under the prediction objective.
+These results suggest that the all-variable curves in \Cref{fig:synthetic_main} slightly underestimate the deployment MSE under an optimal follower.}
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=\textwidth]{images/appendix_individual_followers.pdf}
-    \caption{\individualexp{Population follower of \Cref{sec:synthetic_experiments} (solid lines, filled markers) and individual followers of \Cref{app:individual_followers} (dashed lines, open markers), evaluated on identical draws of the exogenous noise. For both followers, the intervention on $X_4$ may depend on $X_1$, unlike in \Cref{fig:synthetic_main}.
+    \caption{\individualexp{Population follower of \Cref{sec:synthetic_experiments} (solid lines, filled markers) and individual followers of \Cref{app:individual_followers} (dashed lines, open markers), evaluated on the same draws of the exogenous noise. For both followers, the shift of $X_4$ may depend on $X_1$, unlike in \Cref{fig:synthetic_main}.
     Left two panels: linear-Gaussian SCM with population regression predictors.
     Right two panels: nonlinear SCM with predictors estimated from finite data.
     In each pair, the follower maximizes the leader's MSE (left) or minimizes the prediction $\E[f_S(X_S)]$ (right).
-    The two followers yield nearly the same deployment MSE for $\PA(Y)$ and $\SB(Y)$ and when the follower minimizes the prediction; when it maximizes the MSE, the individual followers reach a slightly higher deployment MSE for the all-variable predictor.
-    Curves average $10$ runs, with $95\%$ confidence bands.}}
+    Curves average $10$ runs, with $95\%$ confidence intervals for the mean.}}
     \label{fig:individual_followers}
 \end{figure}
 
