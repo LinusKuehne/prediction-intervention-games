@@ -1935,7 +1935,7 @@ Continuing backwards along the topological order defines $g_j$ for all $j \in \C
 Which functions these are does not matter for $c_j$: the observed $x_i$ equals $g_i(x_{O_i}, \varepsilon_i)$ with $x_{O_i}$ observed by (ii), so knowing $g_i$ gives information only about $\varepsilon_i$, which enters only $X_i$, whose value is already known.
 We may therefore treat $x_i$ as a constant, as done in the text.}
 The functions $(g_j)_{j \in \CH(E)}$ therefore describe the optimal behavior of the individual follower.
-As in \Cref{sec:individuals}, they also maximize the population objective $\E[k(f, X, Y)]$ among all structural assignments of the $X_j$ that are functions of $(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
+As in \Cref{sec:individuals}, they also maximize the population objective $\E_{(g_j)_{j \in \CH(E)}}[k(f, X, Y)]$, where the subscript indicates that the structural assignment of every $X_j$ is replaced by $g_j(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
 
 A population of such individual followers hence acts like a population follower whose structural assignment of $X_j$ is $g_j(X_{\PA(j)}, X_{A_j}, \varepsilon_j)$ with $A_j \coloneqq O_j \setminus \PA(j)$.
 As in \Cref{sec:problem_setup}, $A_j$ must not contain $Y$; that is, the follower may observe $Y$ before setting $X_j$ only if $Y \in \PA(j)$.
@@ -3411,8 +3411,8 @@ A likely reason is that, for a large bound, a shift with the same sign already y
 \Cref{fig:individual_followers} shows that the leader's mean deployment MSE under the two followers agrees to within about $1\%$ for $\PA(Y)$ and $\SB(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the prediction $\E[f_S(X_S)]$.
 When the follower maximizes the leader's MSE, the individual followers reach a mean deployment MSE for the all-variable predictor that is less than $1\%$ higher than under the population follower in the linear-Gaussian SCM and about $2$ to $5\%$ higher in the nonlinear SCM.
 A likely reason is that, in this setting, the optimal shift of $X_4$ is $b$ for some individuals and $-b$ for others, which is more difficult to learn than the shift $-b$ that is optimal for almost all individuals under the prediction objective.
-\linus{In the linear-Gaussian SCM, the sign of the optimal shift of $X_4$ is the sign of a linear function of the follower's observations, which the networks learn well.
-In the nonlinear SCM, the sign is a more complicated function of the observations, and the networks' shifts of $X_1$ also differ from those of the individual followers.}
+In the linear-Gaussian SCM, the sign of the optimal shift of $X_4$ is the sign of a linear function of the follower's observations, which the networks learn well.
+In the nonlinear SCM, the sign is a more complicated function of the observations, and the networks' shifts of $X_1$ also differ from those of the individual followers.
 These results suggest that the all-variable curves in \Cref{fig:synthetic_main} slightly underestimate the deployment MSE under an optimal follower.}
 
 \begin{figure}[t]
