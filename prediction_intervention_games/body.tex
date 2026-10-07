@@ -1926,14 +1926,13 @@ By (i), the variables in $O_j$ are not affected by the intervention on $X_j$; (i
 
 We characterize the follower's optimal choices by backward induction.
 Consider first the last intervention target $X_j$ in the topological order.
-Given its observation $(x_{O_j}, \varepsilon_j)$, the follower chooses the value $c_j$ for $X_j$ that maximizes $\E_{c_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$, where, as in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $c_j$ and all other intervention targets to their observed values.
+Given its observation $(x_{O_j}, \varepsilon_j)$, the follower chooses the value $c_j$ for $X_j$ that maximizes $\E_{c_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$, where, as in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $c_j$; the expectation is over the noise variables the follower has not observed.
 The optimal value depends on the observation, so there is a function $g_j$ with $c_j = g_j(x_{O_j}, \varepsilon_j)$.
 Consider next the second-to-last intervention target $X_l$.
 Given its observation $(x_{O_l}, \varepsilon_l)$, the follower chooses the value $c_l$ for $X_l$ that maximizes $\E_{c_l}[k(f, X, Y) \given X_{O_l} = x_{O_l}, \varepsilon_l]$, where now the structural assignment of $X_j$ is replaced by $g_j(X_{O_j}, \varepsilon_j)$; since $X_{O_j}$ depends on $c_l$, this takes into account that the choice for $X_j$ adapts to $c_l$.
 Again, the optimal value defines a function $g_l(x_{O_l}, \varepsilon_l)$.
 Continuing backwards along the topological order defines $g_j$ for all $j \in \CH(E)$.\footnote{When the follower chooses some $c_j$, it has already set the intervention targets $X_i$ preceding $X_j$ in the topological order, using functions $g_i$ that the backward induction determines only afterwards (if $c_j$ depended on these functions, the backward induction would be circular).
-Which functions these are does not matter for $c_j$: the observed $x_i$ equals $g_i(x_{O_i}, \varepsilon_i)$ with $x_{O_i}$ observed by (ii), so knowing $g_i$ gives information only about $\varepsilon_i$, which enters only $X_i$, whose value is already known.
-We may therefore treat $x_i$ as a constant, as done in the text.}
+Which functions these are does not matter for $c_j$: the observed $x_i$ equals $g_i(x_{O_i}, \varepsilon_i)$ with $x_{O_i}$ observed by (ii), so knowing $g_i$ gives information only about $\varepsilon_i$, which enters only $X_i$, whose value is already known.}
 The functions $(g_j)_{j \in \CH(E)}$ therefore describe the optimal behavior of the individual follower.
 As in \Cref{sec:individuals}, they also maximize the population objective $\E_{(g_j)_{j \in \CH(E)}}[k(f, X, Y)]$, where the subscript indicates that the structural assignment of every $X_j$ is replaced by $g_j(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
 
@@ -3374,7 +3373,7 @@ fresh observations under the selected $E_{\delta_1}, E_{\delta_4}$. The experime
 \individualexp{\subsection{Comparison with individual followers} \label{app:individual_followers}
 
 We compare the population follower of \Cref{sec:synthetic_experiments}, whose intervention functions $E_{\delta_1}$ and $E_{\delta_4}$ are modeled with neural networks, with individual followers whose shifts are computed based on specific realizations of the variables.
-As argued in \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so the leader's deployment MSE should be similar under both.
+As argued in \Cref{sec:individuals} and \Cref{app:individual_followers_theory}, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so the leader's deployment MSE should be similar under both, although equally optimal interventions to minimize the prediction can yield different MSEs.
 Differences can arise from the optimization of the population follower's neural networks, or from the grid and Monte Carlo approximations used for the individual followers.
 
 \paragraph{Individual followers.}
