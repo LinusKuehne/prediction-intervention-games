@@ -697,7 +697,7 @@ For simplicity, let us assume that for all $j \in \CH(E)$, we have
 $\PA(j) \subseteq O \cup \CH(E)$, so the follower has access to all parents of $j$ when setting $j$'s value. 
 %Since the follower observes all variables in $O$, 
 Let us further assume that the follower maximizes a utility of the form 
-$\Vfoll_e(f) = \E_e[k(f,X,Y) \given X_O=x_O]$. \linus{[so this covers both followers we consider??]}
+$\Vfoll_e(f) = \E_e[k(f,X,Y) \given X_O=x_O]$.
 We now consider a solution 
 $(c_j)_{j \in \CH(E)}$ maximizing the individual follower's objective 
 \begin{equation} \label{eq:individual}
@@ -721,7 +721,7 @@ that is, they solve the problem of a population follower with
 $A_j \coloneqq O \setminus \PA(j)$.
 Thus, taking the average over many individual followers optimizing~\eqref{eq:individual} has,
 from the perspective of the leader and the game's value, the same effect as considering a single population follower in an augmented graph.
-\individualexp{\Cref{app:individual_followers_theory} extends the argument to followers who observe the intervention targets' values before intervening, and to targets that are descendants of other targets, as in \Cref{sec:synthetic_experiments}.}
+\individualexp{\Cref{app:individual_followers_theory} extends the argument to followers who observe the value a target would take without intervention, and to targets that are descendants of other targets, as in \Cref{sec:synthetic_experiments}.}
 
 %(This makes sense, intuitively, too: the follower should not be forced to ignore some variables in $O$ when setting values.) 
 
@@ -1922,16 +1922,23 @@ Second, the follower sets $X_4$ after observing $Y$, which is a descendant of th
 We consider an individual follower who sets the intervention targets $X_j$, $j \in \CH(E)$, sequentially along a fixed topological order of $\G_0$.
 Before setting $X_j$ to $x_j$, it observes the noise $\varepsilon_j$ of the structural assignment of $X_j$ and the values $x_{O_j}$ of a set $O_j$ of variables.
 We impose two conditions on $O_j$: (i) its variables precede $X_j$ in the topological order and include $\PA(j)$, and (ii) it contains the earlier intervention targets $X_i$ and their observation sets $O_i$.
+By (i), the variables in $O_j$ are not affected by the intervention on $X_j$; (ii) means when the follower chooses an intervention, it has access to its earlier observations and choices.
 
 We characterize the follower's optimal choices by backward induction.
-For each $j$, let $g_j(x_{O_j}, \varepsilon_j)$ denote the value $x_j$ that maximizes $\E_{x_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$.
-As in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $x_j$, the earlier intervention targets are set to their observed values, and the later ones are set by their functions $g_i$.
-Setting the earlier targets to their observed values does not change the conditional expectation, whatever functions set them, because the noise $\varepsilon_i$ of an earlier target $X_i$ is independent of all other noise variables and enters the SCM only through $X_i$, whose value is observed.
-Starting from the last intervention target and going backwards, this defines $g_j$ for all $j \in \CH(E)$.
+Consider first the last intervention target $X_j$ in the topological order.
+Given its observation $(x_{O_j}, \varepsilon_j)$, the follower chooses the value $c_j$ for $X_j$ that maximizes $\E_{c_j}[k(f, X, Y) \given X_{O_j} = x_{O_j}, \varepsilon_j]$, where, as in \eqref{eq:individual}, the subscript indicates that $X_j$ is set to $c_j$ and all other intervention targets to their observed values.
+The optimal value depends on the observation, so there is a function $g_j$ with $c_j = g_j(x_{O_j}, \varepsilon_j)$.
+Consider next the second-to-last intervention target $X_l$.
+Given its observation $(x_{O_l}, \varepsilon_l)$, the follower chooses the value $c_l$ for $X_l$ that maximizes $\E_{c_l}[k(f, X, Y) \given X_{O_l} = x_{O_l}, \varepsilon_l]$, where now the structural assignment of $X_j$ is replaced by $g_j(X_{O_j}, \varepsilon_j)$; since $X_{O_j}$ depends on $c_l$, this takes into account that the choice for $X_j$ adapts to $c_l$.
+Again, the optimal value defines a function $g_l(x_{O_l}, \varepsilon_l)$.
+Continuing backwards along the topological order defines $g_j$ for all $j \in \CH(E)$.\footnote{When the follower chooses some $c_j$, it has already set the intervention targets $X_i$ preceding $X_j$ in the topological order, using functions $g_i$ that the backward induction determines only afterwards (if $c_j$ depended on these functions, the backward induction would be circular).
+Which functions these are does not matter for $c_j$: the observed $x_i$ equals $g_i(x_{O_i}, \varepsilon_i)$ with $x_{O_i}$ observed by (ii), so knowing $g_i$ gives information only about $\varepsilon_i$, which enters only $X_i$, whose value is already known.
+We may therefore treat $x_i$ as a constant, as done in the text.}
 The functions $(g_j)_{j \in \CH(E)}$ therefore describe the optimal behavior of the individual follower.
 As in \Cref{sec:individuals}, they also maximize the population objective $\E[k(f, X, Y)]$ among all structural assignments of the $X_j$ that are functions of $(X_{O_j}, \varepsilon_j)$, because at every stage they maximize the conditional expectation for every value of the observation.
 
 A population of such individual followers hence acts like a population follower whose structural assignment of $X_j$ is $g_j(X_{\PA(j)}, X_{A_j}, \varepsilon_j)$ with $A_j \coloneqq O_j \setminus \PA(j)$.
+As in \Cref{sec:problem_setup}, $A_j$ must not contain $Y$; that is, the follower may observe $Y$ before setting $X_j$ only if $Y \in \PA(j)$.
 The new edges $X_k \to X_j$, $k \in A_j$, follow the topological order, so the augmented graph is acyclic, and $\varepsilon_j$, which is independent of all other noise variables, serves as the exogenous noise of the new assignment.}
 
 \subsection{Subset-level formulation} \label{app:subset_formulation}
@@ -3375,7 +3382,7 @@ We use the SCMs of \Cref{app:dgp} with the graph in \Cref{fig:synthetic_dag}.
 Each individual corresponds to one draw of the exogenous noise and chooses shifts $\delta_1, \delta_4 \in [-b, b]$ for its own $X_1$ and $X_4$.
 It chooses $\delta_1$ after observing $(x_2, \varepsilon_1)$, and $\delta_4$ after $Y$ has been realized and it has observed $(x_1, x_2, y, \varepsilon_4)$; it observes neither $x_3$ nor $\varepsilon_5$.
 Both followers know the SCM, its noise distributions, and the predictor $f_S$.
-Each choice aims to maximize the follower's objective of \Cref{sec:sdfds} given its observations, that is, in expectation over the noise terms it has not observed.
+Each choice aims to optimize the follower's objective of \Cref{sec:sdfds} given its observations, that is, in expectation over the noise terms it has not observed.
 
 \paragraph{Information of the two followers.}
 In \Cref{sec:synthetic_experiments}, $E_{\delta_4}$ depends only on $(Y, X_2, \varepsilon_4)$.
@@ -3392,18 +3399,20 @@ Grid search is feasible because each individual makes two scalar choices for giv
 We evaluate both followers' deployment MSEs on the same $4000$ fresh draws of the exogenous noise.
 
 \paragraph{Training of the population follower.}
-The networks are trained as in \Cref{app:synthetic_implementation}, except that the bound is increased linearly from $0$ to $b$ over the first $1000$ of $2000$ training steps and equals $b$ afterwards.
-For the all-variable predictor and a follower maximizing the MSE, the computed shifts of $X_4$ equal $\pm b$ for nearly all individuals, with varying sign.
+The networks are trained as in \Cref{app:synthetic_implementation}, except that the bound is increased linearly from $0$ to $b$ over the first $1000$ of $2000$ training steps and equals $b$ afterwards.\footnote{%
+For the all-variable predictor and a follower maximizing the MSE, the individual followers' shifts of $X_4$ equal $\pm b$, with varying sign.
 With the full bound from the start, some runs learn $X_4$ shifts with the same sign for all individuals.
 This did not occur with the increasing bound.
-A likely reason is that, for a large bound, a shift with the same sign for all individuals already yields most of the follower's gain, so the networks learn it first and their outputs saturate at $\pm b$.
+A likely reason is that, for a large bound, a shift with the same sign already yields most of the follower's gain, so the networks learn it first and their outputs saturate at $\pm b$.}
 
-\individualexp{[TODO for myself: if we use this training recipe, use for all experiments. potentially also add X1 to X4 in 6.1 to harmonize]}
+\linus{[TODO for myself: if we use this training recipe, use for all experiments. potentially also add X1 to X4 in 6.1 to harmonize]}
 
 \paragraph{Results.}
 \Cref{fig:individual_followers} shows that the leader's mean deployment MSE under the two followers agrees to within about $1\%$ for $\PA(Y)$ and $\SB(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the prediction $\E[f_S(X_S)]$.
 When the follower maximizes the leader's MSE, the individual followers reach a mean deployment MSE for the all-variable predictor that is less than $1\%$ higher than under the population follower in the linear-Gaussian SCM and about $2$ to $5\%$ higher in the nonlinear SCM.
 A likely reason is that, in this setting, the optimal shift of $X_4$ is $b$ for some individuals and $-b$ for others, which is more difficult to learn than the shift $-b$ that is optimal for almost all individuals under the prediction objective.
+\linus{In the linear-Gaussian SCM, the sign of the optimal shift of $X_4$ is the sign of a linear function of the follower's observations, which the networks learn well.
+In the nonlinear SCM, the sign is a more complicated function of the observations, and the networks' shifts of $X_1$ also differ from those of the individual followers.}
 These results suggest that the all-variable curves in \Cref{fig:synthetic_main} slightly underestimate the deployment MSE under an optimal follower.}
 
 \begin{figure}[t]
