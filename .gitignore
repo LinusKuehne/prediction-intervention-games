@@ -230,6 +230,7 @@ synthetic_stable_blanket_experiments/outputs_use_13
 synthetic_stable_blanket_experiments/outputs_standard
 synthetic_stable_blanket_experiments/outputs_lingauss
 synthetic_stable_blanket_experiments/outputs_x4-uses-x1-x3
+paper/
 
 # LaTeX build artifacts
 *.aux
