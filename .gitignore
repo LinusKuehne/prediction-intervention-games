@@ -213,6 +213,7 @@ settings.json
 dev_scripts/
 .DS_Store
 .credentials
+CLAUDE.md
 results/
 tmp/
 synthetic_stable_blanket_experiments/.mplconfig
@@ -220,6 +221,7 @@ synthetic_stable_blanket_experiments/old_results
 outputs-simple
 outputs
 outputs-lingauss
+outputs_appendix_anneal_standard/
 synthetic_stable_blanket_experiments/outputs_train_size_smoke
 synthetic_stable_blanket_experiments/outputs_train_size_sweep
 synthetic_stable_blanket_experiments/outputs_train_size_sweep_student_t

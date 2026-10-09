@@ -86,6 +86,9 @@ optimized adversary**.
 
 - `run_experiments.py` — command-line entry point
 - `plot_paper_figures.py` — assembles paper figures from saved CSVs
+- `run_individual_follower.py` — compares individual and population followers for Appendix E.5
+- `plot_appendix_individual_followers.py` — assembles the Appendix E.5 figure from saved CSVs
+- `appendix_numbers.py` — computes the summary numbers quoted in Appendix E.5
 - `synthetic_experiments/scm.py` — nonlinear/linear-Gaussian SCMs and bounded adversarial mechanisms
 - `synthetic_experiments/models.py` — predictor training
 - `synthetic_experiments/adversary.py` — adversary optimization
@@ -193,7 +196,7 @@ python run_experiments.py \
   --costs 0.0 0.01 0.05 0.1 0.25 0.5 1.0
 ```
 
-### Individual vs. population follower (appendix E.5; see appendix_experiment_report.md)
+### Individual vs. population follower (Appendix E.5)
 
 `run_individual_follower.py` compares the paper's neural *population* follower
 with *individual* followers (§ 2.1 of the paper) on identical draws of
@@ -216,31 +219,24 @@ python run_individual_follower.py --output-dir outputs_appendix_anneal_standard 
 python run_individual_follower.py --lineargaussian --output-dir outputs_appendix_anneal_lingauss \
   --followers nn_standard nn_x1 ind_nox3 --attack-bound-anneal-steps 1000 --num-runs 10 --n-jobs 5 \
   --torch-num-threads 1 --grid-size-x1 13 --mc-stage1 16 --mc-stage2 16 --mc-final 64
-# appendix figure in the style of Fig. 2 (written to the paper's images folder)
+# appendix figure in the style of Fig. 2 (written to paper_plots/)
+mkdir -p paper_plots
 python plot_appendix_individual_followers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard \
-  --out ../../prediction_intervention_games/images/appendix_individual_followers --max-bound 1.0
+  --out paper_plots/appendix_individual_followers --max-bound 1.0
 # numbers quoted in the text of E.5 (effect of adding X1, relative differences, shifts of X4)
 python appendix_numbers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard
 ```
 
-(The stored folders were produced with `--followers nn_standard nn_x1`; the `ind_nox3` rows,
-which are deterministic given predictor, noise draws and seed, were copied from the previous
-run and the summaries rebuilt with `--plot-only`. The commands above recompute them, which
-costs about 50 extra minutes in the nonlinear SCM.)
+`outputs_appendix_anneal_standard/` is gitignored; generate its results locally
+with the command above before running the plotting and summary commands.
 
 Outputs per `--output-dir`: `results_per_run.csv`, `results_summary.csv`,
 `paired_differences.csv`, `config.json` and figures; `--plot-only` rebuilds summaries and
-figures from a saved `results_per_run.csv`. `appendix_numbers.py` computes the numbers in the text from these
-files; passing `../../further_experiments/outputs_appendix_final_{lingauss,standard}` (training
-without the bound ramp) instead gives the runs in which the shift of `X4` has one sign. Library code:
+figures from a saved `results_per_run.csv`. `appendix_numbers.py` computes the numbers
+in the text from these files. Library code:
 `synthetic_experiments/individual_follower.py` (noise draws, outcomes, first implementation),
 `synthetic_experiments/individual_follower_simple.py` (compact implementation used for
 `ind_nox3`), `synthetic_experiments/warm_start.py` (diagnostic only).
-
-Earlier and exploratory runs (first implementation and its validation, one-shot validation of
-§ 2.1, sequential runs with warm start and omniscient follower, the training-recipe study, the
-information ladder) and all their outputs are in `further_experiments/` (gitignored); see
-`further_experiments/README.md`.
 
 ### Expected qualitative behavior
 
