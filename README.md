@@ -19,7 +19,7 @@ pip install -e ".[dev]"
 
 ## §6.1 — Synthetic experiments
 
-Nonlinear and linear-Gaussian SCMs from §6.1 / Appendix E of the paper. The
+Nonlinear and linear-Gaussian SCMs from §6.1 / Appendix F of the paper. The
 package implements three predictors (parents, stable blanket, all variables)
 trained on data from a known SCM, then evaluates each under its own best-response
 adversary.
@@ -86,9 +86,10 @@ optimized adversary**.
 
 - `run_experiments.py` — command-line entry point
 - `plot_paper_figures.py` — assembles paper figures from saved CSVs
-- `run_individual_follower.py` — compares individual and population followers for Appendix E.5
-- `plot_appendix_individual_followers.py` — assembles the Appendix E.5 figure from saved CSVs
-- `appendix_numbers.py` — computes the summary numbers quoted in Appendix E.5
+- `run_individual_follower.py` — compares individual and population followers for Appendix F.5
+- `plot_appendix_individual_followers.py` — assembles the Appendix F.5 figure from saved CSVs
+- `appendix_numbers.py` — computes the summary numbers quoted in the [Appendix F.5 details](#appendix-f5-of-the-paper-details-of-the-comparison-with-individual-followers) at the end of this README
+- `decompose_risk.py` — splits the deployment MSE of PA(Y) and SB(Y) in the nonlinear SCM into population risk and regression error (numbers quoted in Appendix F.3)
 - `synthetic_experiments/scm.py` — nonlinear/linear-Gaussian SCMs and bounded adversarial mechanisms
 - `synthetic_experiments/models.py` — predictor training
 - `synthetic_experiments/adversary.py` — adversary optimization
@@ -196,10 +197,15 @@ python run_experiments.py \
   --costs 0.0 0.01 0.05 0.1 0.25 0.5 1.0
 ```
 
-### Individual vs. population follower (Appendix E.5)
+### Individual vs. population follower (Appendix F.5)
+
+Appendix F.5 of the paper shows only the figure and a short summary.
+The description of the two followers, the computation, the training of the population
+follower, and the results were moved from the paper to the
+[end of this README](#appendix-f5-of-the-paper-details-of-the-comparison-with-individual-followers).
 
 `run_individual_follower.py` compares the paper's neural *population* follower
-with *individual* followers (§ 2.1 of the paper) on identical draws of
+with *individual* followers (App. C.1 of the paper) on identical draws of
 individuals. Every individual solves their own problem by grid search, with
 Monte Carlo over not-yet-realized noise (backward induction: choose `delta_1`
 after observing `(X2, eps1)`, then `delta_4` after observing `(X1, X2, Y, eps4)`).
@@ -207,7 +213,7 @@ Follower names: `nn_x1` is the population follower whose `delta_4` additionally
 sees `X1` (`A_4 = {X1}`), `nn_standard` the follower of § 6.1, `ind_nox3` the
 individual followers.
 
-Final runs used in the paper. The networks are trained with the recipe of § E.4 plus a bound
+Final runs used in the paper. The networks are trained with the recipe of App. F.4 plus a bound
 ramp (`--attack-bound-anneal-steps 1000`: the bound grows linearly from 0 to `b` over the first
 1000 of the 2000 steps), which avoids runs in which the shift of `X4` collapses to one sign for
 the whole population:
@@ -223,7 +229,7 @@ python run_individual_follower.py --lineargaussian --output-dir outputs_appendix
 mkdir -p paper_plots
 python plot_appendix_individual_followers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard \
   --out paper_plots/appendix_individual_followers --max-bound 1.0
-# numbers quoted in the text of E.5 (effect of adding X1, relative differences, shifts of X4)
+# numbers quoted in the Appendix F.5 details at the end of this README (effect of adding X1, relative differences, shifts of X4)
 python appendix_numbers.py outputs_appendix_anneal_lingauss outputs_appendix_anneal_standard
 ```
 
@@ -233,7 +239,7 @@ with the command above before running the plotting and summary commands.
 Outputs per `--output-dir`: `results_per_run.csv`, `results_summary.csv`,
 `paired_differences.csv`, `config.json` and figures; `--plot-only` rebuilds summaries and
 figures from a saved `results_per_run.csv`. `appendix_numbers.py` computes the numbers
-in the text from these files. Library code:
+in the Appendix F.5 details from these files. Library code:
 `synthetic_experiments/individual_follower.py` (noise draws, outcomes, first implementation),
 `synthetic_experiments/individual_follower_simple.py` (compact implementation used for
 `ind_nox3`), `synthetic_experiments/warm_start.py` (diagnostic only).
@@ -244,6 +250,24 @@ in the text from these files. Library code:
 - As the intervention bound increases, `all_variables` should worsen under its own adversary.
 - `stable_blanket` is typically flatter across bounds because it ignores the mutable descendants while still using the stable child `X3`.
 - `parents` is also flat across bounds, but can be worse than `stable_blanket` because it discards `X3`.
+
+### Risk decomposition (Appendix F.3)
+
+`decompose_risk.py` trains the PA(Y) and SB(Y) predictors of Fig. 2 (same seeds as
+`run_experiments.py`), optimizes the neural follower for each objective and bound, and
+splits the resulting deployment MSE into the population risk `E_e[Var(Y | X_S)]` and the
+regression error `E_e[(f_S - fhat_S)^2]`, where `f_S = E[Y | X_S]` is computed exactly
+(closed form for PA(Y), numerical integration over `eps_Y` for SB(Y)). It also evaluates
+constant shifts of `X1`.
+
+```bash
+python decompose_risk.py --output-dir outputs_risk_decomposition --num-runs 10 --n-jobs 5 --torch-num-threads 2
+```
+
+Outputs: `results_per_run.csv`, `summary.txt` (the tables behind the numbers quoted in
+Appendix F.3) and `config.json`. `--summarize-only` recomputes `summary.txt` from a saved
+`results_per_run.csv`; `--attack-bound-anneal-steps 1000` uses the follower of Appendix F.5
+instead. The run takes about 15 minutes on an Apple M4 Pro.
 
 ## §6.2 — Causal Chambers experiments
 
@@ -279,3 +303,50 @@ ruff check .          # lint
 ruff check --fix .    # auto-fix
 ruff format .         # format
 ```
+
+## Appendix F.5 of the paper: details of the comparison with individual followers
+
+Appendix F.5 of the paper shows only the figure (`paper_plots/appendix_individual_followers.pdf`, Fig. 6 in the paper) and a short summary.
+The following text was removed from the paper and is reproduced here verbatim; section, figure, and lemma numbers refer to the paper.
+
+We compare the population follower of § 6.1, whose intervention functions $E_{\delta_1}$ and $E_{\delta_4}$ are modeled with neural networks, with individual followers who each choose shifts given their own realization of the observed variables.
+As argued in § 2.1 and App. C.1, a population of individual followers is also modeled by a population follower whose interventions depend on the same variables and noise terms, so the leader's deployment MSE should be similar under both, although equally optimal interventions to minimize the prediction can yield different MSEs.
+Differences can arise from the optimization of the population follower's neural networks, or from the grid and Monte Carlo approximations used for the individual followers.
+
+**Individual followers.**
+We use the SCMs of App. F.1 with the training DAG $\mathcal{G}_0$ in Fig. 1.
+Each individual corresponds to one draw of the exogenous noise and chooses shifts $\delta_1, \delta_4 \in [-b, b]$ for their own $X_1$ and $X_4$.
+They choose $\delta_1$ after observing $x_2$ and the current value $\tilde{x}_1$ of $X_1$, and $\delta_4$ after $Y$ has been realized and they have observed $x_1$, $x_2$, $y$, and the current value $\tilde{x}_4$; they observe neither $x_3$ nor $x_5$.
+Since the noise in App. F.1 is additive, observing $\tilde{x}_1$ and $\tilde{x}_4$ given the parents is equivalent to observing $\varepsilon_1$ and $\varepsilon_4$, which is how we implement it.
+Both followers know the SCM, its noise distributions, and the predictor $f_S$.
+The individuals choose each shift to optimize their objective of App. F.2 given their observations, that is, in expectation over the remaining noise variables.
+
+**Information of the two followers.**
+In § 6.1, $E_{\delta_4}$ depends only on $(Y, X_2, \varepsilon_4)$.
+Here, we also allow it to depend on $X_1$, which the individual knows from their earlier choice, so both followers have the same information.
+The dependence on $X_1$ adds the edge $X_1 \to X_4$ to $\mathcal{G}_0$ (one of the dashed edges in Fig. 1).
+In the notation of App. C.1, $O_1 = \{2\}$ and $O_4 = \{1, 2, Y\}$, so $A_1 = \varnothing$ and $A_4 = \{1\}$, which satisfies the assumption of Lem. 4.
+With the training described below, adding $X_1$ as an input of $E_{\delta_4}$ leaves the population follower's mean deployment MSE for $\mathrm{PA}(Y)$ and $\mathrm{SB}(Y)$ unchanged and changes it for the all-variable predictor by at most about 0.002 over the displayed bounds (10 runs).
+
+**Computation.**
+We approximate each individual's optimal shifts $\delta_1$ and $\delta_4$ by searching over 13 equally spaced values in $[-b, b]$, estimating each candidate's expected objective by averaging over draws of the remaining noise variables.
+For the final $\delta_4$ decision, we use 64 draws of $(\varepsilon_3, \varepsilon_5)$.
+To evaluate a candidate $\delta_1$, we use backward induction as in App. C.1: we draw $(\varepsilon_Y, \varepsilon_4)$ 16 times, select the best $\delta_4$ on the grid in each draw using 16 draws of $(\varepsilon_3, \varepsilon_5)$, and average the resulting estimates.
+Grid search is feasible because each individual makes two scalar choices for given inputs; the population follower instead optimizes functions of all inputs, represented by neural networks in App. F.2.
+We evaluate the leader's deployment MSE under both followers on the same 4000 fresh draws of the exogenous noise.
+
+**Training of the population follower.**
+The networks are trained as in App. F.4, except that the bound is increased linearly from 0 to $b$ over the first 1000 of 2000 training steps and equals $b$ afterwards.[^anneal]
+
+[^anneal]: For the all-variable predictor and a follower maximizing the MSE, the individual followers' shifts of $X_4$ equal $\pm b$, with varying sign.
+    With the full bound from the start, the networks in some runs learn shifts of $X_4$ with the same sign for all individuals.
+    Such shifts did not occur with the increasing bound.
+    A likely reason is that, for a large bound, a shift with the same sign already yields most of the follower's gain, so the networks learn such a shift first and their outputs saturate at $\pm b$.
+
+**Results.**
+Fig. 6 shows that the leader's mean deployment MSE under the two followers agrees to within about 1% for $\mathrm{PA}(Y)$ and $\mathrm{SB}(Y)$ under both follower objectives, and for the all-variable predictor when the follower minimizes the expected prediction.
+When the follower maximizes the leader's MSE, the individual followers reach a mean deployment MSE for the all-variable predictor that is less than 1% higher than under the population follower in the linear-Gaussian SCM and about 2 to 5% higher in the nonlinear SCM.
+A likely reason is that, for the all-variable predictor and the MSE objective, the optimal shift of $X_4$ is $b$ for some individuals and $-b$ for others, which is more difficult to learn than the shift $-b$ that is optimal for almost all individuals under the prediction objective.
+In the linear-Gaussian SCM, the sign of the optimal shift of $X_4$ is the sign of a linear function of the individual's observations, which the networks learn well.
+In the nonlinear SCM, the sign is a more complicated function of the observations, and the networks' shifts of $X_1$ also differ from those of the individual followers.
+Since the population follower of § 6.1 is trained without the increasing bound, these results suggest that, when the follower maximizes the MSE, the all-variable curves in Fig. 2 slightly underestimate the deployment MSE under an optimal follower.

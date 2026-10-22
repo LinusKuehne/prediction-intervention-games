@@ -250,6 +250,8 @@ paper/
 main.app
 main.pdf
 
+rebuttal/
+
 # paper sources and figures (LaTeX build artifacts above stay ignored)
 !prediction_intervention_games/*.tex
 !prediction_intervention_games/images/*.pdf

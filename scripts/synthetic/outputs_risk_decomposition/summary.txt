@@ -1,0 +1,104 @@
+runs: 10
+max |attacked_mse - nn_attacked_test_mse| = 2.37e-08
+max |attacked_mse - pop_risk - reg_error - cross| = 2.17e-16
+max |cross| = 0.0055
+
+=== neural follower: means over runs ===
+                                 attacked_mse  attacked_mse_sem  pop_risk_condvar  reg_error  mean_delta_x1  mean_abs_delta_x1  frac_bound_x1  frac_neg_x1  mean_y
+objective  method         bound                                                                                                                                   
+mse        parents        0.25         0.1613            0.0009            0.1600     0.0017         0.0341             0.2176         0.7002       0.4363  0.5828
+                          0.50         0.1635            0.0009            0.1600     0.0040         0.0202             0.4771         0.8775       0.4785  0.5924
+                          1.00         0.1865            0.0028            0.1600     0.0270        -0.0394             0.9817         0.9514       0.5197  0.5440
+                          1.50         0.2749            0.0098            0.1600     0.1151         0.1451             1.4824         0.9690       0.4516  0.7168
+           stable_blanket 0.25         0.1041            0.0007            0.1029     0.0011        -0.2299             0.2451         0.9491       0.9613  0.3836
+                          0.50         0.1109            0.0008            0.1093     0.0015        -0.4536             0.4779         0.8925       0.9589  0.2292
+                          1.00         0.1260            0.0010            0.1215     0.0042        -0.8826             0.9097         0.8207       0.9608 -0.0581
+                          1.50         0.1446            0.0021            0.1306     0.0141        -1.2349             1.3069         0.7459       0.9500 -0.3013
+prediction parents        0.25         0.1606            0.0008            0.1600     0.0009        -0.1560             0.2395         0.8896       0.8130  0.3465
+                          0.50         0.1614            0.0008            0.1600     0.0016        -0.3097             0.4539         0.7942       0.8125  0.1589
+                          1.00         0.1695            0.0014            0.1600     0.0095        -0.6036             0.8115         0.6531       0.8134 -0.1934
+                          1.50         0.1985            0.0051            0.1600     0.0381        -0.8600             1.0970         0.5257       0.8124 -0.4968
+           stable_blanket 0.25         0.1006            0.0007            0.0997     0.0010        -0.1545             0.2406         0.9023       0.8100  0.3462
+                          0.50         0.1044            0.0008            0.1031     0.0013        -0.3067             0.4605         0.8098       0.8089  0.1584
+                          1.00         0.1142            0.0011            0.1105     0.0035        -0.5952             0.8285         0.6771       0.8089 -0.1954
+                          1.50         0.1285            0.0024            0.1182     0.0102        -0.8550             1.1247         0.5457       0.8104 -0.5006
+
+=== no follower ===
+                attacked_mse  pop_risk_condvar  reg_error
+method                                                   
+parents               0.1605            0.1600     0.0009
+stable_blanket        0.0972            0.0963     0.0010
+
+=== increase relative to b=0.25 (first plotted bound, as in Appendix F.3), split into population risk and regression error (paired over runs) ===
+ objective         method  bound  d_mse  d_mse_sem  d_pop_risk  d_pop_risk_sem  d_reg_error  d_reg_error_sem  pop_risk_share
+       mse        parents    0.5 0.0023     0.0003      0.0000          0.0000       0.0023           0.0003          0.0000
+       mse        parents    1.0 0.0252     0.0025      0.0000          0.0000       0.0253           0.0026          0.0000
+       mse        parents    1.5 0.1136     0.0096      0.0000          0.0000       0.1134           0.0099          0.0000
+       mse stable_blanket    0.5 0.0069     0.0002      0.0064          0.0001       0.0004           0.0000          0.9291
+       mse stable_blanket    1.0 0.0219     0.0005      0.0185          0.0002       0.0031           0.0005          0.8461
+       mse stable_blanket    1.5 0.0405     0.0019      0.0277          0.0013       0.0130           0.0033          0.6829
+prediction        parents    0.5 0.0008     0.0001      0.0000          0.0000       0.0007           0.0001          0.0000
+prediction        parents    1.0 0.0089     0.0012      0.0000          0.0000       0.0086           0.0011          0.0000
+prediction        parents    1.5 0.0379     0.0052      0.0000          0.0000       0.0373           0.0049          0.0000
+prediction stable_blanket    0.5 0.0038     0.0002      0.0035          0.0001       0.0003           0.0001          0.9042
+prediction stable_blanket    1.0 0.0136     0.0006      0.0108          0.0002       0.0025           0.0005          0.7975
+prediction stable_blanket    1.5 0.0279     0.0022      0.0186          0.0002       0.0092           0.0021          0.6650
+
+=== increase relative to no intervention, split into population risk and regression error (paired over runs) ===
+ objective         method  bound  d_mse  d_mse_sem  d_pop_risk  d_pop_risk_sem  d_reg_error  d_reg_error_sem  pop_risk_share
+       mse        parents   0.25 0.0007     0.0001      0.0000          0.0000       0.0008           0.0001          0.0000
+       mse        parents   0.50 0.0030     0.0004      0.0000          0.0000       0.0031           0.0004          0.0000
+       mse        parents   1.00 0.0260     0.0025      0.0000          0.0000       0.0261           0.0027          0.0000
+       mse        parents   1.50 0.1143     0.0096      0.0000          0.0000       0.1142           0.0099          0.0000
+       mse stable_blanket   0.25 0.0068     0.0002      0.0066          0.0001       0.0001           0.0000          0.9659
+       mse stable_blanket   0.50 0.0137     0.0003      0.0130          0.0001       0.0005           0.0001          0.9475
+       mse stable_blanket   1.00 0.0288     0.0006      0.0252          0.0002       0.0032           0.0005          0.8747
+       mse stable_blanket   1.50 0.0474     0.0019      0.0343          0.0013       0.0131           0.0033          0.7238
+prediction        parents   0.25 0.0001     0.0001      0.0000          0.0000       0.0000           0.0001          0.0000
+prediction        parents   0.50 0.0008     0.0002      0.0000          0.0000       0.0008           0.0002          0.0000
+prediction        parents   1.00 0.0089     0.0013      0.0000          0.0000       0.0086           0.0011          0.0000
+prediction        parents   1.50 0.0379     0.0052      0.0000          0.0000       0.0373           0.0049          0.0000
+prediction stable_blanket   0.25 0.0034     0.0001      0.0033          0.0001       0.0000           0.0000          0.9826
+prediction stable_blanket   0.50 0.0072     0.0003      0.0068          0.0001       0.0004           0.0001          0.9409
+prediction stable_blanket   1.00 0.0170     0.0007      0.0142          0.0001       0.0025           0.0005          0.8344
+prediction stable_blanket   1.50 0.0313     0.0022      0.0219          0.0002       0.0092           0.0021          0.6994
+
+=== increase from the smallest bound, PA(Y) vs SB(Y) (paired over runs) ===
+mse        attacked_mse     0.25->0.5: PA +0.0023  SB +0.0069  SB-PA +0.0046 (sem 0.0004)
+mse        pop_risk_condvar 0.25->0.5: PA +0.0000  SB +0.0064  SB-PA +0.0064 (sem 0.0001)
+mse        reg_error        0.25->0.5: PA +0.0023  SB +0.0004  SB-PA -0.0019 (sem 0.0003)
+mse        attacked_mse     0.25->1.0: PA +0.0252  SB +0.0219  SB-PA -0.0033 (sem 0.0022)
+mse        pop_risk_condvar 0.25->1.0: PA +0.0000  SB +0.0185  SB-PA +0.0185 (sem 0.0002)
+mse        reg_error        0.25->1.0: PA +0.0253  SB +0.0031  SB-PA -0.0222 (sem 0.0023)
+mse        attacked_mse     0.25->1.5: PA +0.1136  SB +0.0405  SB-PA -0.0731 (sem 0.0087)
+mse        pop_risk_condvar 0.25->1.5: PA +0.0000  SB +0.0277  SB-PA +0.0277 (sem 0.0013)
+mse        reg_error        0.25->1.5: PA +0.1134  SB +0.0130  SB-PA -0.1004 (sem 0.0079)
+prediction attacked_mse     0.25->0.5: PA +0.0008  SB +0.0038  SB-PA +0.0030 (sem 0.0002)
+prediction pop_risk_condvar 0.25->0.5: PA +0.0000  SB +0.0035  SB-PA +0.0035 (sem 0.0001)
+prediction reg_error        0.25->0.5: PA +0.0007  SB +0.0003  SB-PA -0.0004 (sem 0.0001)
+prediction attacked_mse     0.25->1.0: PA +0.0089  SB +0.0136  SB-PA +0.0047 (sem 0.0012)
+prediction pop_risk_condvar 0.25->1.0: PA +0.0000  SB +0.0108  SB-PA +0.0108 (sem 0.0002)
+prediction reg_error        0.25->1.0: PA +0.0086  SB +0.0025  SB-PA -0.0061 (sem 0.0010)
+prediction attacked_mse     0.25->1.5: PA +0.0379  SB +0.0279  SB-PA -0.0100 (sem 0.0045)
+prediction pop_risk_condvar 0.25->1.5: PA +0.0000  SB +0.0186  SB-PA +0.0186 (sem 0.0002)
+prediction reg_error        0.25->1.5: PA +0.0373  SB +0.0092  SB-PA -0.0281 (sem 0.0044)
+
+=== constant shift of X1 (delta_4 = 0): means over runs ===
+                            attacked_mse  pop_risk_condvar  reg_error
+method         const_shift                                           
+parents        -1.50              0.2179            0.1600     0.0581
+               -1.00              0.1737            0.1600     0.0141
+               -0.50              0.1620            0.1600     0.0024
+               -0.25              0.1608            0.1600     0.0012
+                0.25              0.1608            0.1600     0.0011
+                0.50              0.1620            0.1600     0.0023
+                1.00              0.1761            0.1600     0.0164
+                1.50              0.2486            0.1600     0.0888
+stable_blanket -1.50              0.1307            0.1136     0.0173
+               -1.00              0.1169            0.1113     0.0056
+               -0.50              0.1071            0.1053     0.0018
+               -0.25              0.1022            0.1011     0.0011
+                0.25              0.0924            0.0915     0.0010
+                0.50              0.0881            0.0871     0.0012
+                1.00              0.0837            0.0803     0.0036
+                1.50              0.0922            0.0771     0.0155

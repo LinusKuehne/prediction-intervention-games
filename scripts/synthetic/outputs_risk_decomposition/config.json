@@ -1,0 +1,87 @@
+{
+  "output_dir": "outputs_risk_decomposition",
+  "num_runs": 10,
+  "n_jobs": 5,
+  "torch_num_threads": 2,
+  "bounds": [
+    0.25,
+    0.5,
+    1.0,
+    1.5
+  ],
+  "objectives": [
+    "mse",
+    "prediction"
+  ],
+  "attack_bound_anneal_steps": 0,
+  "const_shifts": [
+    -1.5,
+    -1.0,
+    -0.5,
+    -0.25,
+    0.25,
+    0.5,
+    1.0,
+    1.5
+  ],
+  "summarize_only": false,
+  "experiment_config": {
+    "device": "cpu",
+    "torch_num_threads": 2,
+    "n_train": 50000,
+    "train_sizes": null,
+    "n_val": 3000,
+    "n_test": 4000,
+    "predictor_hidden_dim": 256,
+    "predictor_depth": 5,
+    "predictor_lr": 0.001,
+    "predictor_batch_size": 512,
+    "predictor_max_epochs": 500,
+    "predictor_patience": 20,
+    "predictor_weight_decay": 1e-05,
+    "attack_hidden_dim": 64,
+    "attack_lr": 0.001,
+    "attack_steps": 2000,
+    "attack_batch_size": 512,
+    "attack_restarts": 5,
+    "attack_eval_size": 10000,
+    "attack_mode": "bound",
+    "intervene_on_x1": true,
+    "include_x6": false,
+    "noise_distribution": "gaussian",
+    "student_t_df": 3,
+    "x4_uses_x1_x3": false,
+    "x4_uses_x1": false,
+    "attack_depth": 2,
+    "attack_slope": 1.0,
+    "attack_lr_schedule": "constant",
+    "attack_continuation": false,
+    "attack_bound_anneal_steps": 0,
+    "lineargaussian": false,
+    "simple": false,
+    "bounds": [
+      0.25,
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "costs": [
+      0.0,
+      0.01,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "max_perturbation_bound": 2.0,
+    "objectives": [
+      "signed_error",
+      "mse",
+      "prediction"
+    ],
+    "num_runs": 3,
+    "output_dir": "outputs"
+  }
+}
