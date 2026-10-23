@@ -316,8 +316,8 @@ Differences can arise from the optimization of the population follower's neural 
 **Individual followers.**
 We use the SCMs of App. F.1 with the training DAG $\mathcal{G}_0$ in Fig. 1.
 Each individual corresponds to one draw of the exogenous noise and chooses shifts $\delta_1, \delta_4 \in [-b, b]$ for their own $X_1$ and $X_4$.
-They choose $\delta_1$ after observing $x_2$ and the current value $\tilde{x}_1$ of $X_1$, and $\delta_4$ after $Y$ has been realized and they have observed $x_1$, $x_2$, $y$, and the current value $\tilde{x}_4$; they observe neither $x_3$ nor $x_5$.
-Since the noise in App. F.1 is additive, observing $\tilde{x}_1$ and $\tilde{x}_4$ given the parents is equivalent to observing $\varepsilon_1$ and $\varepsilon_4$, which is how we implement it.
+They choose $\delta_1$ after observing $x_2$ and the current value $x'_1$ of $X_1$, and $\delta_4$ after $Y$ has been realized and they have observed $x_1$, $x_2$, $y$, and the current value $x'_4$; they observe neither $x_3$ nor $x_5$.
+Since the noise in App. F.1 is additive, observing $x'_1$ and $x'_4$ given the parents is equivalent to observing $\varepsilon_1$ and $\varepsilon_4$, which is how we implement it.
 Both followers know the SCM, its noise distributions, and the predictor $f_S$.
 The individuals choose each shift to optimize their objective of App. F.2 given their observations, that is, in expectation over the remaining noise variables.
 
